@@ -37,17 +37,17 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT d.id as departmentId, d.[name], d.budget, e.id as employeeId, e.firstname, e.lastname, e.issupervisor 
-                                        FROM employee e 
-                                        LEFT JOIN department d
-                                        ON e.departmentId = d.id";
+                    cmd.CommandText = @"SELECT d.id, d.[name], d.budget, e.id AS employeeId, e.firstname, e.lastname, e.issupervisor, e.departmentId
+                                        FROM Department d 
+                                        LEFT JOIN Employee e
+                                        ON d.id = e.departmentid";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     Dictionary<int, Department> departments = new Dictionary<int, Department>();
                     Dictionary<int, Employee> employeesSort = new Dictionary<int, Employee>();
                     while (reader.Read())
                     {
-                        int deptId = reader.GetInt32(reader.GetOrdinal("departmentId"));
+                        int deptId = reader.GetInt32(reader.GetOrdinal("id"));
                         if (!departments.ContainsKey(deptId))
                         {
                             Department newDepartment = new Department
@@ -69,6 +69,8 @@ namespace BangazonWorkForceManagement.Controllers
                                     Id = employeeId,
                                     FirstName = reader.GetString(reader.GetOrdinal("firstName")),
                                     LastName = reader.GetString(reader.GetOrdinal("lastName")),
+                                    IsSuperVisor = false,
+                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId"))
                                 };
                                 employeesSort.Add(employeeId, newEmployee);
 
@@ -79,7 +81,10 @@ namespace BangazonWorkForceManagement.Controllers
                                         Id = employeeId,
                                         FirstName = reader.GetString(reader.GetOrdinal("firstName")),
                                         LastName = reader.GetString(reader.GetOrdinal("lastName")),
-                                    });
+                                        IsSuperVisor = false,
+                                        DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId"))
+                                    }
+                                    );
                             }
                         }
                     }

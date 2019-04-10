@@ -154,34 +154,51 @@ namespace BangazonWorkForceManagement.Controllers
                                     MaxAttendees = reader.GetInt32(reader.GetOrdinal("TrainingProgramMaxAtendees"))
                                 });
                                 }
-
                             }
                         }
                     };
                     reader.Close();
                     return View(employee);
                 }
-  
-                }
             }
+        }
         
 
         // GET: Employees/Create
         public ActionResult Create()
         {
-            return View();
+            {
+                EmployeeCreateViewModel viewModel =
+                    new EmployeeCreateViewModel(_config.GetConnectionString("DefaultConnection"));
+                return View(viewModel);
+            }
         }
 
         // POST: Employees/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(EmployeeCreateViewModel viewModel)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"insert into Employee(FirstName, LastName, DepartmentId, IsSuperVisor)
+                                             VALUES (@firstname, @lastname, @departmentid, @issupervisor)";
+                        
+                        cmd.Parameters.Add(new SqlParameter("@firstname", viewModel.Employee.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@lastname", viewModel.Employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@departmentid", viewModel.Employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@issupervisor", viewModel.Employee.IsSuperVisor));
 
-                return RedirectToAction(nameof(Index));
+                        cmd.ExecuteNonQuery();
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
             catch
             {

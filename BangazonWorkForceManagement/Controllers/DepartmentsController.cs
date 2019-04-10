@@ -48,7 +48,8 @@ namespace BangazonWorkForceManagement.Controllers
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
                             Name = reader.GetString(reader.GetOrdinal("name")),
-                            Budget = reader.GetInt32(reader.GetOrdinal("budget"))
+                            Budget = reader.GetInt32(reader.GetOrdinal("budget")),
+                            Employees = GetDeptEmployee(reader.GetInt32(reader.GetOrdinal("id")))
                         };
                         departments.Add(department);
 
@@ -62,7 +63,32 @@ namespace BangazonWorkForceManagement.Controllers
         // GET: Departments/Details/5
         public ActionResult Details(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"SELECT id, [name], budget FROM Department WHERE id = {id}";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    Department department = null;
+
+                    if (reader.Read())
+                    {
+                        department = new Department
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Name = reader.GetString(reader.GetOrdinal("name")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("budget")),
+                            
+                            
+                        };
+                        
+                    }
+                    reader.Close();
+                    return View(department);
+                }
+            }
         }
 
         // GET: Departments/Create
@@ -144,6 +170,36 @@ namespace BangazonWorkForceManagement.Controllers
             catch
             {
                 return View();
+            }
+        }
+
+        public List<Employee> GetDeptEmployee(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"select id, firstName, LastName, departmentId FROM employee WHERE departmentid = {id}";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Employee> employees = new List<Employee>();
+
+                    while (reader.Read())
+                    {
+                        employees.Add(new Employee
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            FirstName = reader.GetString(reader.GetOrdinal("firstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("lastName")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId"))
+                        });
+                    }
+                    reader.Close();
+                    return employees;
+
+
+                }
             }
         }
     }

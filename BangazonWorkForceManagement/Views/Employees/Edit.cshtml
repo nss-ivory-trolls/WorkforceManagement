@@ -13,6 +13,26 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
+                <label asp-for="Employee.LastName" class="control-label"></label>
+                <input asp-for="Employee.LastName" class="form-control" />
+                <span asp-validation-for="Employee.LastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Employee.DepartmentId" class="control-label"></label>
+                <select asp-for="Employee.DepartmentId" asp-items="@Model.DepartmentOptions"></select>
+                <span asp-validation-for="Employee.DepartmentId" class="text-danger"></span>
+            </div>
+            @*<div class="form-group">
+                <label asp-for="Student.SlackHandle" class="control-label"></label>
+                <input asp-for="Student.SlackHandle" class="form-control" />
+                <span asp-validation-for="Student.SlackHandle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Student.CohortId" class="control-label"></label>
+                <select asp-for="Student.CohortId" asp-items="@Model.CohortOptions"></select>
+                <span asp-validation-for="Student.CohortId" class="text-danger"></span>
+            </div>*@
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>

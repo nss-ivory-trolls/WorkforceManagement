@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using BangazonAPI.Models;
+using BangazonWorkForceManagement.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -67,19 +68,32 @@ namespace BangazonWorkForceManagement.Controllers
         // GET: Departments/Create
         public ActionResult Create()
         {
-            return View();
+            DepartmentCreateViewModel viewModel = new DepartmentCreateViewModel();
+            return View(viewModel);
         }
 
         // POST: Departments/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(DepartmentCreateViewModel viewModel)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"INSERT INTO Department ([name], budget)
+                                            VALUES (@name, @budget)";
+                        cmd.Parameters.Add(new SqlParameter("@name", viewModel.Department.Name));
+                        cmd.Parameters.Add(new SqlParameter("@budget", viewModel.Department.Budget));
 
-                return RedirectToAction(nameof(Index));
+                        cmd.ExecuteReader();
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
             catch
             {

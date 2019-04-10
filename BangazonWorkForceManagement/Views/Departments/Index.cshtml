@@ -21,6 +21,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Budget)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Employees)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -28,13 +31,13 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Id)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Budget)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Employees.Count)
             </td>
             <td>
                 @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |

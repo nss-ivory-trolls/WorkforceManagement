@@ -17,5 +17,7 @@ namespace BangazonWorkForceManagement.Models.ViewModels
 
 
         public string Manufacturer { get; set; }
+
+        public bool DisplayDelete { get; set; }
     }
 }

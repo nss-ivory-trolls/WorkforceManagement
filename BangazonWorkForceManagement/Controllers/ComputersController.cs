@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Threading.Tasks;
 using BangazonAPI.Models;
@@ -52,7 +53,7 @@ namespace BangazonWorkForceManagement.Controllers
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                            DecommissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"))
+                            DecomissionDate = reader.IsDBNull(reader.GetOrdinal("DecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("DecomissionDate"))
                         };
 
                         computers.Add(computer);
@@ -79,7 +80,7 @@ namespace BangazonWorkForceManagement.Controllers
                 Make = computer.Make,
                 Manufacturer = computer.Manufacturer,
                 PurchaseDate = computer.PurchaseDate,
-                DecommissionDate = computer.DecommissionDate
+                DecomissionDate = computer.DecomissionDate
             };
 
             return View(viewModel);
@@ -105,12 +106,9 @@ namespace BangazonWorkForceManagement.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"INSERT INTO computer (
-                                               PurchaseDate,  
-                                               Make, Manufacturer)
-                                             VALUES (@PurchaseDate, 
-                                                @Make, @Manufacturer)";
+                        cmd.CommandText = @"insert into Computer (PurchaseDate, DecomissionDate, Make, Manufacturer) values (@PurchaseDate, @DecomissionDate, @Make, @Manufacturer)";
                         cmd.Parameters.Add(new SqlParameter("@PurchaseDate", viewModel.PurchaseDate));
+                        cmd.Parameters.Add(new SqlParameter("@DecomissionDate", SqlDateTime.Null));
                         cmd.Parameters.Add(new SqlParameter("@Make", viewModel.Make));
                         cmd.Parameters.Add(new SqlParameter("@Manufacturer", viewModel.Manufacturer));
                         cmd.ExecuteNonQuery();
@@ -133,35 +131,58 @@ namespace BangazonWorkForceManagement.Controllers
             {
                 return NotFound();
             }
-            ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
-            {
-                Id = id,
-                Make = computer.Make,
-                Manufacturer = computer.Manufacturer,
-                PurchaseDate = computer.PurchaseDate
-            };
 
-            return View(viewModel);
-        }
-
-        public ActionResult DeleteFailure(int id)
-        {
-            Computer computer = GetComputerById(id);
-            if (computer == null)
+            using (SqlConnection conn = Connection)
             {
-                return NotFound();
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT c.Id AS ComputerId,
+                                        c.PurchaseDate, c. DecomissionDate,
+                                        c.Make, c.Manufacturer, ce.ComputerId as ComputerEmployeeCID
+                                        FROM Computer c LEFT JOIN ComputerEmployee ce on c.id = ce.ComputerId
+                                        WHERE c.Id = @id;";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    cmd.ExecuteNonQuery();
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    
+                        try { 
+                        int assignedcomputer = reader.GetInt32(reader.GetOrdinal("ComputerEmployeeCID"));
+                        
+                            ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
+                            {
+                                Id = id,
+                                Make = computer.Make,
+                                Manufacturer = computer.Manufacturer,
+                                PurchaseDate = computer.PurchaseDate,
+                                DisplayDelete = false
+                            };
+                            return View(viewModel);
+
+                        } catch {
+                            ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
+                            {
+                                Id = id,
+                                Make = computer.Make,
+                                Manufacturer = computer.Manufacturer,
+                                PurchaseDate = computer.PurchaseDate,
+                                DisplayDelete = false
+                            };
+                            return View(viewModel);
+                     
+                    
+                    }
+                    
+                    
+                }
+
+                
             }
-
-            ComputerDeleteFailureViewModel viewModel = new ComputerDeleteFailureViewModel
-            {
-                Id = id,
-                Make = computer.Make,
-                Manufacturer = computer.Manufacturer,
-                PurchaseDate = computer.PurchaseDate
-            };
-
-            return View(viewModel);
         }
+
 
         // POST: Computers/Delete/5
         [HttpPost]
@@ -185,11 +206,11 @@ namespace BangazonWorkForceManagement.Controllers
             }
             catch
             {
-                return Redirect(DeleteFailure(id).ToString());
+
+                return RedirectToAction(nameof(Index));
             }
         }
 
-        
 
         private Computer GetComputerById(int id)
         {
@@ -216,7 +237,7 @@ namespace BangazonWorkForceManagement.Controllers
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                            DecommissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"))
+                            DecomissionDate = reader.IsDBNull(reader.GetOrdinal("DecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("DecomissionDate"))
                         };
                     }
 

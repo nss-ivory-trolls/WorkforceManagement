@@ -13,7 +13,7 @@ namespace BangazonWorkForceManagement.Models.ViewModels
         public DateTime PurchaseDate { get; set; }
 
         
-        public DateTime DecommissionDate { get; set; }
+        public DateTime? DecomissionDate { get; set; }
 
        
         public string Make { get; set; }

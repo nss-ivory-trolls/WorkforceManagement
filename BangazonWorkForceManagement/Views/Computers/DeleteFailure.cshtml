@@ -1,42 +1,43 @@
-﻿@model BangazonWorkForceManagement.Models.ViewModels.ComputerDeleteFailureViewModel
+﻿@model BangazonWorkForceManagement.Models.ViewModels.ComputerDeleteViewModel
 
 @{
-    ViewData["Title"] = "DeleteFailure";
+    ViewData["Title"] = "Delete";
 }
 
-<h1>DeleteFailure</h1>
+<h1>Delete</h1>
 
+<h3>This computer has been assigned to an employee and can not be deleted.</h3>
 <div>
-    <h4>ComputerDeleteFailure</h4>
-    <h2>This computer has been assigned to an employee and can not be deleted.</h2>
+    <h4>ComputerDeleteViewModel</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Id)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Id)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PurchaseDate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.PurchaseDate)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Make)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Make)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Manufacturer)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Manufacturer)
         </dd>
     </dl>
-</div>
-<div>
-    <a asp-action="Index">Back to List</a>
+
+    <form asp-action="Delete">
+        <a asp-action="Index">Back to List</a>
+    </form>
 </div>

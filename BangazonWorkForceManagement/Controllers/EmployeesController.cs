@@ -58,11 +58,11 @@ namespace BangazonWorkForceManagement.Controllers
                             IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
                             DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                             Department = new Department
-                            {  
+                            {
                                 Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
                                 Name = reader.GetString(reader.GetOrdinal("DepartmentName")),
                                 Budget = reader.GetInt32(reader.GetOrdinal("DepartmentBudget"))
-                            }                        
+                            }
                         };
 
                         employees.Add(employee);
@@ -82,8 +82,7 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @" 
-										SELECT e.FirstName AS EmployeeFirstName,
+                    cmd.CommandText = @"SELECT e.FirstName AS EmployeeFirstName,
                                                e.Id AS EmployeeId,
                                                e.IsSupervisor AS IsSupervisor,
 	                                           e.LastName AS EmployeeLastName,
@@ -162,7 +161,7 @@ namespace BangazonWorkForceManagement.Controllers
                 }
             }
         }
-        
+
 
         // GET: Employees/Create
         public ActionResult Create()
@@ -188,7 +187,7 @@ namespace BangazonWorkForceManagement.Controllers
                     {
                         cmd.CommandText = @"insert into Employee(FirstName, LastName, DepartmentId, IsSuperVisor)
                                              VALUES (@firstname, @lastname, @departmentid, @issupervisor)";
-                        
+
                         cmd.Parameters.Add(new SqlParameter("@firstname", viewModel.Employee.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@lastname", viewModel.Employee.LastName));
                         cmd.Parameters.Add(new SqlParameter("@departmentid", viewModel.Employee.DepartmentId));
@@ -209,19 +208,53 @@ namespace BangazonWorkForceManagement.Controllers
         // GET: Employees/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            Employee employee = GetEmployeeById(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+
+            EmployeeEditViewModel viewModel = new EmployeeEditViewModel
+            {
+                Departments = GetAllDepartments(),
+                Employee = employee,
+                TrainingPrograms = GetAllTrainingPrograms()
+            };
+
+            return View(viewModel);
         }
 
         // POST: Employees/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult Edit(int id, EmployeeEditViewModel ViewModel)
         {
             try
             {
                 // TODO: Add update logic here
 
-                return RedirectToAction(nameof(Index));
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Employee
+                                            SET firstname = @firstname,
+                                            lastname = @lastname,
+                                            isSupervisor = @isSupervisor,
+                                            DepartmentId = @DepartmentId
+                                            WHERE id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@firstname", ViewModel.Employee.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@lastname", ViewModel.Employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@isSupervisor", ViewModel.Employee.IsSuperVisor));
+                        cmd.Parameters.Add(new SqlParameter("@DepartmentId", ViewModel.Employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
             catch
             {
@@ -229,27 +262,122 @@ namespace BangazonWorkForceManagement.Controllers
             }
         }
 
-        // GET: Employees/Delete/5
-        public ActionResult Delete(int id)
+
+
+        private Employee GetEmployeeById(int id)
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT e.Id AS EmployeeId,
+                                               e.FirstName, e.LastName, 
+                                               e.IsSupervisor, e.DepartmentId
+                                         FROM Employee
+                                         WHERE id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    Employee employee = null;
+
+                    if (reader.Read())
+                    {
+                        employee = new Employee
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))             
+                        };
+                    }
+
+                    reader.Close();
+
+                    return employee;
+                }
+            }
+
         }
 
-        // POST: Employees/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        private List<Department> GetAllDepartments()
         {
-            try
+            using (SqlConnection conn = Connection)
             {
-                // TODO: Add delete logic here
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT id, name from Department;";
+                    SqlDataReader reader = cmd.ExecuteReader();
 
-                return RedirectToAction(nameof(Index));
+                    List<Department> departments = new List<Department>();
+
+                    while (reader.Read())
+                    {
+                        departments.Add(new Department
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("name"))
+                        });
+                    }
+                    reader.Close();
+
+                    return departments;
+                }
             }
-            catch
+        }
+
+        private List<TrainingProgram> GetAllTrainingPrograms()
+        {
+            using (SqlConnection conn = Connection)
             {
-                return View();
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT id, name, startdate, enddate, maxattendees from Department;";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
+
+                    while (reader.Read())
+                    {
+                        trainingPrograms.Add(new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Name = reader.GetString(reader.GetOrdinal("name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("startdate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("enddate"))
+                        });
+                    }
+                    reader.Close();
+
+                    return trainingPrograms;
+                }
             }
         }
     }
 }
+
+//// GET: Employees/Delete/5
+//public ActionResult Delete(int id)
+//{
+//    return View();
+//}
+
+//// POST: Employees/Delete/5
+//[HttpPost]
+//[ValidateAntiForgeryToken]
+//public ActionResult Delete(int id, IFormCollection collection)
+//{
+//    try
+//    {
+//        // TODO: Add delete logic here
+
+//        return RedirectToAction(nameof(Index));
+//    }
+//    catch
+//    {
+//        return View();
+//    }
+//}

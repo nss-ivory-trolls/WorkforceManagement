@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using BangazonAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace BangazonWorkForceManagement.Controllers
 {
@@ -11,7 +14,7 @@ namespace BangazonWorkForceManagement.Controllers
     {
         private readonly IConfiguration _config;
 
-        public StudentController(IConfiguration config)
+        public EmployeesController(IConfiguration config)
         {
             _config = config;
         }
@@ -27,7 +30,46 @@ namespace BangazonWorkForceManagement.Controllers
         // GET: Employees
         public ActionResult Index()
         {
-            return View();
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT e.FirstName AS EmployeeFirstName,
+                                               e.Id AS EmployeeId,
+                                               e.IsSupervisor AS IsSupervisor,
+	                                           e.LastName AS EmployeeLastName,
+                                               d.Budget AS DepartmentBudget,
+	                                           d.Name AS DepartmentName,
+                                               d.Id as DepartmentId
+                                        FROM Employee e
+                                        JOIN Department AS d on d.Id = e.DepartmentId";
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<Employee> employees = new List<Employee>();
+                    while (reader.Read())
+                    {
+                        Employee employee = new Employee
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                            FirstName = reader.GetString(reader.GetOrdinal("EmployeeFirstName")),
+                            LastName = reader.GetString(reader.GetOrdinal("EmployeeLastName")),
+                            IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
+                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                            Department = new Department
+                            {  
+                                Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                Name = reader.GetString(reader.GetOrdinal("DepartmentName")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("DepartmentBudget"))
+                            }                        
+                        };
+
+                        employees.Add(employee);
+                    }
+                    reader.Close();
+                    return View(employees);
+                }
+            }
         }
 
         // GET: Employees/Details/5

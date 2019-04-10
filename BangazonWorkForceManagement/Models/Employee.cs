@@ -20,6 +20,12 @@ namespace BangazonAPI.Models
         [StringLength(55, MinimumLength = 2)]
         public string LastName { get; set; }
 
+        [Display(Name = "Employee Name")]
+        public string FullName
+        {
+            get { return $"{FirstName} {LastName}"; }
+        }
+
         [Required]
         public bool IsSuperVisor { get; set; }
 

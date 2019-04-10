@@ -80,8 +80,8 @@ namespace BangazonWorkForceManagement.Controllers
                             Id = reader.GetInt32(reader.GetOrdinal("id")),
                             Name = reader.GetString(reader.GetOrdinal("name")),
                             Budget = reader.GetInt32(reader.GetOrdinal("budget")),
-                            
-                            
+                            Employees = GetDeptEmployee(reader.GetInt32(reader.GetOrdinal("id")))
+
                         };
                         
                     }

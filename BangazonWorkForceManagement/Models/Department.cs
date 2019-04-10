@@ -11,7 +11,7 @@ namespace BangazonAPI.Models
         public int Id { get; set; }
 
         [Required]
-        [StringLength(55, MinimumLength = 1)]
+        [StringLength(55, MinimumLength = 2)]
         public string Name { get; set; }
 
         [Required]

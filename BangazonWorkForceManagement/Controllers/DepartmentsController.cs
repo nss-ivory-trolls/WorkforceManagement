@@ -37,25 +37,54 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT id, [name], budget FROM Department";
+                    cmd.CommandText = @"SELECT d.id as departmentId, d.[name], d.budget, e.id as employeeId, e.firstname, e.lastname, e.issupervisor 
+                                        FROM employee e 
+                                        LEFT JOIN department d
+                                        ON e.departmentId = d.id";
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    List<Department> departments = new List<Department>();
-
+                    Dictionary<int, Department> departments = new Dictionary<int, Department>();
+                    Dictionary<int, Employee> employeesSort = new Dictionary<int, Employee>();
                     while (reader.Read())
                     {
-                        Department department = new Department
+                        int deptId = reader.GetInt32(reader.GetOrdinal("departmentId"));
+                        if (!departments.ContainsKey(deptId))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Budget = reader.GetInt32(reader.GetOrdinal("budget")),
-                            Employees = GetDeptEmployee(reader.GetInt32(reader.GetOrdinal("id")))
-                        };
-                        departments.Add(department);
+                            Department newDepartment = new Department
+                            {
+                                Id = deptId,
+                                Name = reader.GetString(reader.GetOrdinal("name")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("budget"))
+                            };
+                            departments.Add(deptId, newDepartment);
+                        }
 
+                        if (!reader.IsDBNull(reader.GetOrdinal("employeeId")))
+                        {
+                            int employeeId = reader.GetInt32(reader.GetOrdinal("employeeId"));
+                            if (!employeesSort.ContainsKey(employeeId))
+                            {
+                                Employee newEmployee = new Employee
+                                {
+                                    Id = employeeId,
+                                    FirstName = reader.GetString(reader.GetOrdinal("firstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("lastName")),
+                                };
+                                employeesSort.Add(employeeId, newEmployee);
+
+                                Department currentDepartment = departments[deptId];
+                                currentDepartment.Employees.Add(
+                                    new Employee
+                                    {
+                                        Id = employeeId,
+                                        FirstName = reader.GetString(reader.GetOrdinal("firstName")),
+                                        LastName = reader.GetString(reader.GetOrdinal("lastName")),
+                                    });
+                            }
+                        }
                     }
-                        reader.Close();
-                        return View(departments);
+                    reader.Close();
+                    return View(departments.Values.ToList());
                 }
             }
         }
@@ -68,7 +97,8 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = $@"SELECT id, [name], budget FROM Department WHERE id = {id}";
+                    cmd.CommandText = $@"SELECT id, [name], budget FROM Department WHERE id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     Department department = null;

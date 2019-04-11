@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace BangazonAPI.Models
 {
 
     public class Department
     {
-
-
         public int Id { get; set; }
 
         [Required]
@@ -15,8 +14,14 @@ namespace BangazonAPI.Models
         public string Name { get; set; }
 
         [Required]
-        public int Budget { get; set; }
+        public int Budget { get; set; } 
 
-        public List<Employee> Employees { get; set; }
+
+        public string Currency
+        {
+            get { return Budget.ToString("C", CultureInfo.CurrentCulture); }
+        }
+        
+        public List<Employee> Employees { get; set; } = new List<Employee>();
     }
 }

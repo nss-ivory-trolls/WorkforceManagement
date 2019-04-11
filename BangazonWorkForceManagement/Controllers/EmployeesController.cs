@@ -106,7 +106,7 @@ namespace BangazonWorkForceManagement.Controllers
 										JOIN Computer AS c on c.Id = ce.ComputerId
 										JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
 										JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
-										WHERE e.Id = @id";
+										WHERE e.Id = @id AND ce.UnAssignDate IS NULL";
                     cmd.Parameters.Add(new SqlParameter("@Id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
                     EmployeeDetailViewModel employee = null;

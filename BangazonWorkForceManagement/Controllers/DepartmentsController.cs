@@ -228,35 +228,5 @@ namespace BangazonWorkForceManagement.Controllers
                 return View();
             }
         }
-
-        public List<Employee> GetDeptEmployee(int id)
-        {
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = $@"select id, firstName, LastName, departmentId FROM employee WHERE departmentid = {id}";
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    List<Employee> employees = new List<Employee>();
-
-                    while (reader.Read())
-                    {
-                        employees.Add(new Employee
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("firstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("lastName")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId"))
-                        });
-                    }
-                    reader.Close();
-                    return employees;
-
-
-                }
-            }
-        }
     }
 }

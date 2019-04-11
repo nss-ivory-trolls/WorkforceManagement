@@ -10,9 +10,8 @@ namespace BangazonWorkForceManagement.Models.Views
     public class EmployeeEditViewModel
     {
         public Employee Employee { get; set; }
-        public Department Department { get; set; }
         public List<Department> Departments { get; set; }
-        public List<TrainingProgram> TrainingPrograms { get; set; }
+        //public List<TrainingProgram> TrainingPrograms { get; set; }
         public List<SelectListItem> DepartmentOptions
         {
             get

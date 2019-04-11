@@ -217,8 +217,8 @@ namespace BangazonWorkForceManagement.Controllers
             EmployeeEditViewModel viewModel = new EmployeeEditViewModel
             {
                 Departments = GetAllDepartments(),
-                Employee = employee,
-                TrainingPrograms = GetAllTrainingPrograms()
+                Employee = employee
+                //TrainingPrograms = GetAllTrainingPrograms()
             };
 
             return View(viewModel);
@@ -239,14 +239,10 @@ namespace BangazonWorkForceManagement.Controllers
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
                         cmd.CommandText = @"UPDATE Employee
-                                            SET firstname = @firstname,
-                                            lastname = @lastname,
-                                            isSupervisor = @isSupervisor,
+                                            SET lastname = @lastname,
                                             DepartmentId = @DepartmentId
-                                            WHERE id = @id";
-                        cmd.Parameters.Add(new SqlParameter("@firstname", ViewModel.Employee.FirstName));
-                        cmd.Parameters.Add(new SqlParameter("@lastname", ViewModel.Employee.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@isSupervisor", ViewModel.Employee.IsSuperVisor));
+                                            WHERE id = @id";                     
+                        cmd.Parameters.Add(new SqlParameter("@lastname", ViewModel.Employee.LastName));      
                         cmd.Parameters.Add(new SqlParameter("@DepartmentId", ViewModel.Employee.DepartmentId));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
@@ -274,7 +270,7 @@ namespace BangazonWorkForceManagement.Controllers
                     cmd.CommandText = @"SELECT e.Id AS EmployeeId,
                                                e.FirstName, e.LastName, 
                                                e.IsSupervisor, e.DepartmentId
-                                         FROM Employee
+                                         FROM Employee e
                                          WHERE id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -335,7 +331,7 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT id, name, startdate, enddate, maxattendees from Department;";
+                    cmd.CommandText = @"SELECT id, name, startdate, enddate, maxattendees from TrainingProgram;";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
@@ -359,25 +355,4 @@ namespace BangazonWorkForceManagement.Controllers
     }
 }
 
-//// GET: Employees/Delete/5
-//public ActionResult Delete(int id)
-//{
-//    return View();
-//}
 
-//// POST: Employees/Delete/5
-//[HttpPost]
-//[ValidateAntiForgeryToken]
-//public ActionResult Delete(int id, IFormCollection collection)
-//{
-//    try
-//    {
-//        // TODO: Add delete logic here
-
-//        return RedirectToAction(nameof(Index));
-//    }
-//    catch
-//    {
-//        return View();
-//    }
-//}

@@ -101,10 +101,17 @@ namespace BangazonWorkForceManagement.Controllers
 											   tp.MaxAttendees as TrainingProgramMaxAtendees
                                         FROM Employee e
                                         JOIN Department AS d on d.Id = e.DepartmentId
+<<<<<<< HEAD
 										LEFT JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
 										LEFT JOIN Computer AS c on c.Id = ce.ComputerId
 										LEFT JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
 										LEFT JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
+=======
+										JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
+										JOIN Computer AS c on c.Id = ce.ComputerId
+										JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
+										JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
+>>>>>>> master
 										WHERE e.Id = @id AND ce.UnAssignDate IS NULL";
                     cmd.Parameters.Add(new SqlParameter("@Id", id));
                     SqlDataReader reader = cmd.ExecuteReader();

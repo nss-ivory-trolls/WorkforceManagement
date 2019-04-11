@@ -126,19 +126,22 @@ namespace BangazonWorkForceManagement.Controllers
                                     Name = reader.GetString(reader.GetOrdinal("DepartmentName")),
                                     Budget = reader.GetInt32(reader.GetOrdinal("DepartmentBudget"))
                                 },
-                                Computer = new Computer
+                                Computer = new Computer()
+                            };
+                        }
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                        {                         
+                                employee.Computer = new Computer
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                     PurchaseDate = reader.GetDateTime(reader.GetOrdinal("ComputerPurchaseDate")),
                                     DecommissionDate = reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
                                     Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
                                     Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"))
-                                }
+                                };
                             };
-                        }
-                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
-                        {
-
+                        
+                    
                             if (!reader.IsDBNull(reader.GetOrdinal("TrainingProgramId")))
                             {
                                 if (!employee.TrainingProgramList.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("TrainingProgramId"))))
@@ -154,8 +157,7 @@ namespace BangazonWorkForceManagement.Controllers
                                 });
                                 }
                             }
-                        }
-                    };
+                        }                    
                     reader.Close();
                     return View(employee);
                 }

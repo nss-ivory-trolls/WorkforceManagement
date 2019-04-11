@@ -81,7 +81,7 @@ namespace BangazonWorkForceManagement.Controllers
                                         Id = employeeId,
                                         FirstName = reader.GetString(reader.GetOrdinal("firstName")),
                                         LastName = reader.GetString(reader.GetOrdinal("lastName")),
-                                        IsSuperVisor = false,
+                                        IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("issupervisor")),
                                         DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId"))
                                     }
                                     );
@@ -102,23 +102,44 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = $@"SELECT id, [name], budget FROM Department WHERE id = @id";
+                    cmd.CommandText = $@"SELECT d.id, d.[name], d.budget, e.id AS employeeId, e.firstname, e.lastname, e.issupervisor, e.departmentId 
+                                         FROM Department d 
+                                         LEFT JOIN Employee e
+                                         ON d.id = e.departmentid
+                                         WHERE d.id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     Department department = null;
 
-                    if (reader.Read())
+                    while (reader.Read())
                     {
-                        department = new Department
+                        if (department == null)
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            Budget = reader.GetInt32(reader.GetOrdinal("budget")),
-                            Employees = GetDeptEmployee(reader.GetInt32(reader.GetOrdinal("id")))
+                            department = new Department
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("id")),
+                                Name = reader.GetString(reader.GetOrdinal("name")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("budget"))
+                            };
+                        }
 
-                        };
-                        
+                        if (!reader.IsDBNull(reader.GetOrdinal("employeeId")))
+                        {
+                            int employeeId = reader.GetInt32(reader.GetOrdinal("employeeId"));
+                            if (!department.Employees.Any(e => e.Id == employeeId))
+                            {
+                                Employee employee = new Employee
+                                {
+                                    Id = employeeId,
+                                    FirstName = reader.GetString(reader.GetOrdinal("firstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("lastName")),
+                                    IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("issupervisor")),
+                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("departmentId"))
+                                };
+                                department.Employees.Add(employee);
+                            }
+                        }
                     }
                     reader.Close();
                     return View(department);

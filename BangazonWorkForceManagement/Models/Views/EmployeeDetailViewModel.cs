@@ -1,14 +1,13 @@
-﻿// Author: Megan Cruzen
-
+﻿using BangazonAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BangazonAPI.Models
+namespace BangazonWorkForceManagement.Models.Views
 {
-    public class Employee
+    public class EmployeeDetailViewModel
     {
         public int Id { get; set; }
 
@@ -20,19 +19,14 @@ namespace BangazonAPI.Models
         [StringLength(55, MinimumLength = 2)]
         public string LastName { get; set; }
 
-        [Display(Name = "Employee Name")]
-        public string FullName
-        {
-            get { return $"{FirstName} {LastName}"; }
-        }
-
         [Required]
         public bool IsSuperVisor { get; set; }
 
         [Required]
         public int DepartmentId { get; set; }
-        
+
         public Department Department { get; set; }
         public Computer Computer { get; set; }
+        public List<TrainingProgram> TrainingProgramList { get; set; } = new List<TrainingProgram>();
     }
 }

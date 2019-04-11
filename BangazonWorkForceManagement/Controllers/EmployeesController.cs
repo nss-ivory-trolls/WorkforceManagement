@@ -101,10 +101,10 @@ namespace BangazonWorkForceManagement.Controllers
 											   tp.MaxAttendees as TrainingProgramMaxAtendees
                                         FROM Employee e
                                         JOIN Department AS d on d.Id = e.DepartmentId
-										JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
-										JOIN Computer AS c on c.Id = ce.ComputerId
-										JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
-										JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
+										LEFT JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
+										LEFT JOIN Computer AS c on c.Id = ce.ComputerId
+										LEFT JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
+										LEFT JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
 										WHERE e.Id = @id AND ce.UnAssignDate IS NULL";
                     cmd.Parameters.Add(new SqlParameter("@Id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -130,20 +130,20 @@ namespace BangazonWorkForceManagement.Controllers
                             };
                         }
                         if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
-                        {                         
-                                employee.Computer = new Computer
-                                {
-                                    Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                                    PurchaseDate = reader.GetDateTime(reader.GetOrdinal("ComputerPurchaseDate")),
-                                    DecommissionDate = reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
-                                    Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
-                                    Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"))
-                                };
+                        {
+                            employee.Computer = new Computer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                                PurchaseDate = reader.GetDateTime(reader.GetOrdinal("ComputerPurchaseDate")),
+                                DecommissionDate = reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
+                                Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
+                                Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"))
                             };
-                        
-                    
+                        };
                             if (!reader.IsDBNull(reader.GetOrdinal("TrainingProgramId")))
                             {
+                             
+                              
                                 if (!employee.TrainingProgramList.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("TrainingProgramId"))))
                                 {
                                     employee.TrainingProgramList.Add(
@@ -156,7 +156,10 @@ namespace BangazonWorkForceManagement.Controllers
                                     MaxAttendees = reader.GetInt32(reader.GetOrdinal("TrainingProgramMaxAtendees"))
                                 });
                                 }
-                            }
+                            } else
+                        {
+                            Console.WriteLine("WRONG");
+                        }
                         }                    
                     reader.Close();
                     return View(employee);

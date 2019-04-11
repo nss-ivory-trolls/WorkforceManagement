@@ -18,7 +18,7 @@ namespace BangazonWorkForceManagement.Controllers
 
         public ComputersController(IConfiguration configuration)
         {
-            this._configuration = configuration;
+            _configuration = configuration;
         }
 
         public SqlConnection Connection
@@ -134,6 +134,7 @@ namespace BangazonWorkForceManagement.Controllers
 
             using (SqlConnection conn = Connection)
             {
+                int? assignedcomputer = null;
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
@@ -143,26 +144,15 @@ namespace BangazonWorkForceManagement.Controllers
                                         FROM Computer c LEFT JOIN ComputerEmployee ce on c.id = ce.ComputerId
                                         WHERE c.Id = @id;";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
-
                     cmd.ExecuteNonQuery();
-
                     SqlDataReader reader = cmd.ExecuteReader();
 
-                    
-                        try { 
-                        int assignedcomputer = reader.GetInt32(reader.GetOrdinal("ComputerEmployeeCID"));
-                        
-                            ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
-                            {
-                                Id = id,
-                                Make = computer.Make,
-                                Manufacturer = computer.Manufacturer,
-                                PurchaseDate = computer.PurchaseDate,
-                                DisplayDelete = false
-                            };
-                            return View(viewModel);
+                    while (reader.Read())
 
-                        } catch {
+                    assignedcomputer = reader.IsDBNull(reader.GetOrdinal("ComputerEmployeeCID")) ? (int?)null : (int?)reader.GetInt32(reader.GetOrdinal("ComputerEmployeeCID"));
+
+                    if (assignedcomputer != null) {
+
                             ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
                             {
                                 Id = id,
@@ -171,15 +161,23 @@ namespace BangazonWorkForceManagement.Controllers
                                 PurchaseDate = computer.PurchaseDate,
                                 DisplayDelete = false
                             };
-                            return View(viewModel);
-                     
-                    
-                    }
-                    
-                    
+
+                        reader.Close();
+                        return View(viewModel);
+
+                        } else {
+                            ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
+                            {
+                                Id = id,
+                                Make = computer.Make,
+                                Manufacturer = computer.Manufacturer,
+                                PurchaseDate = computer.PurchaseDate,
+                                DisplayDelete = true
+                            };
+                        reader.Close();
+                        return View(viewModel);
+                    }  
                 }
-
-                
             }
         }
 
@@ -206,7 +204,6 @@ namespace BangazonWorkForceManagement.Controllers
             }
             catch
             {
-
                 return RedirectToAction(nameof(Index));
             }
         }
@@ -240,9 +237,7 @@ namespace BangazonWorkForceManagement.Controllers
                             DecomissionDate = reader.IsDBNull(reader.GetOrdinal("DecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("DecomissionDate"))
                         };
                     }
-
                     reader.Close();
-
                     return computer;
                 }
             }

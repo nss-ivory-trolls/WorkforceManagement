@@ -25,7 +25,7 @@ a single-page application webpage and its data is tracked through a powerful, ha
 - Google Chrome
 
 ## Enitity Relationship Diagram
-<img src="erd.png" width="900" />
+<img src="https://github.com/nss-ice-phantoms/BangazonAPI/blob/master/erd.png" width="900" />
 
 ## Database Setup
 (to be added)

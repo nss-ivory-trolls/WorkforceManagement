@@ -210,17 +210,38 @@ namespace BangazonWorkForceManagement.Controllers
         // GET: TrainingPrograms/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            TrainingProgram trainingProgram = GetTrainingProgramById(id);
+            if (trainingProgram == null)
+            {
+                return NotFound();
+            }
+
+            TrainingProgramDeleteViewModel viewModel = new TrainingProgramDeleteViewModel
+            {
+                TrainingProgram = trainingProgram
+            };
+
+            return View(viewModel);
         }
 
         // POST: TrainingPrograms/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, TrainingProgramDeleteViewModel viewModel)
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM TrainingProgram WHERE id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }

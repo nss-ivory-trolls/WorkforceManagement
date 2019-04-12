@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonWorkForceManagement.Controllers
 {
+    
     public class TrainingProgramsController : Controller
     {
         private readonly IConfiguration _configuration;
@@ -29,16 +30,26 @@ namespace BangazonWorkForceManagement.Controllers
         }
 
         // GET: TrainingPrograms
-        public ActionResult Index()
+        public ActionResult Index(string q)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    if (q == "past")
+                    {
+                        cmd.CommandText = @"SELECT * 
+                                        FROM TrainingProgram 
+                                        WHERE StartDate <= getdate();";
+                    }
+                    else
+                    {
                     cmd.CommandText = @"SELECT * 
                                         FROM TrainingProgram 
                                         WHERE StartDate >= getdate();";
+
+                    }
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
@@ -60,6 +71,7 @@ namespace BangazonWorkForceManagement.Controllers
                 }
             }
         }
+
 
         // GET: TrainingPrograms/Details/5
         public ActionResult Details(int id)

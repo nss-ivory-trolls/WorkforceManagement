@@ -30,14 +30,14 @@ namespace BangazonWorkForceManagement.Controllers
         }
 
         // GET: TrainingPrograms
-        public ActionResult Index(string q)
+        public ActionResult Index(string _pastprograms)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    if (q == "past")
+                    if (_pastprograms == "true")
                     {
                         cmd.CommandText = @"SELECT * 
                                         FROM TrainingProgram 

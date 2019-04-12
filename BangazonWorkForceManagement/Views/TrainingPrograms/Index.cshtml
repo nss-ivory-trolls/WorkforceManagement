@@ -8,7 +8,9 @@
 <h1>Bangazon Training Programs</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Create New</a> |
+    @Html.ActionLink("View Past Programs", "Index", new { _pastprograms = "true" }) |
+    @Html.ActionLink("View Current Programs", "Index", new { _pastprograms = "false" })
 </p>
 <table class="table">
     <thead>
@@ -56,7 +58,3 @@
 }
     </tbody>
 </table>
-<div>
-    @Html.ActionLink("past programs", "Index", new { q = "past" })
-
-</div>

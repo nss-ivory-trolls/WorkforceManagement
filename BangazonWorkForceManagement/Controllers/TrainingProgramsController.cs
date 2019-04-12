@@ -71,8 +71,8 @@ namespace BangazonWorkForceManagement.Controllers
                 {
                     cmd.CommandText = $@"SELECT t.id AS TrainingProgramId, t.name AS ProgramName, t.startDate, t.endDate, t.maxattendees, e.id AS employeeId, e.firstName, e.lastName, e.departmentId, e.issupervisor
                                         FROM TrainingProgram t
-                                        INNER JOIN EmployeeTraining et ON et.TrainingProgramId = t.Id 
-                                        INNER JOIN Employee e ON e.Id = et.EmployeeId
+                                        LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = t.Id 
+                                        LEFT JOIN Employee e ON e.Id = et.EmployeeId
                                         WHERE t.id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -89,8 +89,7 @@ namespace BangazonWorkForceManagement.Controllers
                                 Name = reader.GetString(reader.GetOrdinal("ProgramName")),
                                 StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
                                 EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
-                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxattendees")),
-                                Attendees = new List<Employee>()
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxattendees"))
                             };
                         }
 
@@ -260,8 +259,8 @@ namespace BangazonWorkForceManagement.Controllers
                 {
                     cmd.CommandText = $@"SELECT t.id AS TrainingProgramId, t.name AS ProgramName, t.startDate, t.endDate, t.maxattendees, e.id AS employeeId, e.firstName, e.lastName, e.departmentId, e.issupervisor
                                         FROM TrainingProgram t
-                                        INNER JOIN EmployeeTraining et ON et.TrainingProgramId = t.Id 
-                                        INNER JOIN Employee e ON e.Id = et.EmployeeId
+                                        LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = t.Id 
+                                        LEFT JOIN Employee e ON e.Id = et.EmployeeId
                                         WHERE t.id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -279,7 +278,6 @@ namespace BangazonWorkForceManagement.Controllers
                                 StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
                                 EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
                                 MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxattendees")),
-                                Attendees = new List<Employee>()
                             };
                         }
 

@@ -6,13 +6,10 @@
 
 <h1>Delete</h1>
 
-@if (Model.DisplayDelete == false)
+@if (!Model.ShouldDisplayDelete)
 {
     <h3>The computer has been assigned to an employee and can not be deleted.</h3>
-}
-
-@if (Model.DisplayDelete == true)
-{
+} else {
     <h3>Are you sure you want to delete this?</h3>
 }
 
@@ -46,16 +43,13 @@
             @Html.DisplayFor(model => model.Manufacturer)
         </dd>
     </dl>
-    @if (Model.DisplayDelete == true)
+    @if (Model.ShouldDisplayDelete)
     {
         <form asp-action="Delete">
             <input type="submit" value="Delete" class="btn btn-danger" /> |
             <a asp-action="Index">Back to List</a>
         </form>
-    }
-
-    @if (Model.DisplayDelete == false)
-    {
+    } else {
         <form asp-action="Delete">
             <a asp-action="Index">Back to List</a>
         </form>

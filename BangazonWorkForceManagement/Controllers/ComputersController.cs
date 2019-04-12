@@ -151,7 +151,7 @@ namespace BangazonWorkForceManagement.Controllers
 
                     assignedcomputer = reader.IsDBNull(reader.GetOrdinal("ComputerEmployeeCID")) ? (int?)null : (int?)reader.GetInt32(reader.GetOrdinal("ComputerEmployeeCID"));
 
-                    if (assignedcomputer != null) {
+                    
 
                             ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
                             {
@@ -159,24 +159,13 @@ namespace BangazonWorkForceManagement.Controllers
                                 Make = computer.Make,
                                 Manufacturer = computer.Manufacturer,
                                 PurchaseDate = computer.PurchaseDate,
-                                DisplayDelete = false
-                            };
+                                ShouldDisplayDelete = assignedcomputer == null
+                    };
 
                         reader.Close();
                         return View(viewModel);
 
-                        } else {
-                            ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
-                            {
-                                Id = id,
-                                Make = computer.Make,
-                                Manufacturer = computer.Manufacturer,
-                                PurchaseDate = computer.PurchaseDate,
-                                DisplayDelete = true
-                            };
-                        reader.Close();
-                        return View(viewModel);
-                    }  
+                       
                 }
             }
         }

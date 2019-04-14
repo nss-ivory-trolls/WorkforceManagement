@@ -1,3 +1,4 @@
+
 # Bangazon Workforce Management
 <hr>
 Bangazon Workforce Management is an internal application for Bangazon Corportation's human resources and IT departments. The application allows Bangazon employees to create, list, and view Employees, Training Programs, Departments, and Computers.
@@ -18,4 +19,5 @@ From the list view, when a user clicks on a specific employee, the user should b
 
 #### Create Employee
 From the list view of employees, when a user clicks the "Create New" link, the user should be re-directed to a form. The user can then enter the new employee's first name, last name, whether they are a supervisor and what department they work within.
+
 

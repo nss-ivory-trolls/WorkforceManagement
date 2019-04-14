@@ -23,14 +23,24 @@
                 <span asp-validation-for="Employee.LastName" class="text-danger"></span>
             </div>
             <div class="form-group">
-            <label asp-for="Employee.DepartmentId" class="control-label"></label>
-            <select asp-for="Employee.DepartmentId" asp-items="@Model.DepartmentOptions"></select>
-            <span asp-validation-for="Employee.DepartmentId" class="text-danger"></span>
-        </div>
+                <label asp-for="Employee.DepartmentId" class="control-label"></label>
+                <select asp-for="Employee.DepartmentId" asp-items="@Model.DepartmentOptions"></select>
+                <span asp-validation-for="Employee.DepartmentId" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <label asp-for="NewComputerId" class="control-label"></label>
                 <select asp-for="NewComputerId" asp-items="@Model.ComputerOptions"></select>
                 <span asp-validation-for="NewComputerId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NowAttendingTP" class="control-label"></label>
+                <select asp-for="NowAttendingTP" asp-items="@Model.AttendingTPOptions"></select>
+                <span asp-validation-for="NowAttendingTP" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NowNotAttendingTP" class="control-label"></label>
+                <select asp-for="NowNotAttendingTP" asp-items="@Model.NotAttendingTPOptions"></select>
+                <span asp-validation-for="NowNotAttendingTP" class="text-danger"></span>
             </div>
 
             <div class="form-group">

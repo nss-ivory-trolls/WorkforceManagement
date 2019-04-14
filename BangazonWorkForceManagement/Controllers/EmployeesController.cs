@@ -221,10 +221,13 @@ namespace BangazonWorkForceManagement.Controllers
 
             EmployeeEditViewModel viewModel = new EmployeeEditViewModel
             {             
-                    Departments = GetAllDepartments(),
-                    Employee = GetEmployeeById(id),
-            UnassignedComputers = GetAllUnAssignedComputers(id),                              
-                //TrainingPrograms = GetAllTrainingPrograms()
+                Departments = GetAllDepartments(),
+                Employee = GetEmployeeById(id),
+                UnassignedComputers = GetAllUnAssignedComputers(id),
+                AttendingTP = GetAttendingTP(id),
+                NotAttendingTP = GetNotAttendingTP(id),
+                NowAttendingTP = null,
+                NowNotAttendingTP = null
             };
 
             return View(viewModel);
@@ -260,11 +263,117 @@ namespace BangazonWorkForceManagement.Controllers
                         {
                             UpdateEmployeeComputer(id, NewComputerId, OldCompId);
                         }
-                        return RedirectToAction(nameof(Index));
+
+                    UpdateEmployeeTrainingPrograms(id, ViewModel);
+                    return RedirectToAction(nameof(Index));
                     }
             }
         }
           
+        private void UpdateEmployeeTrainingPrograms(int id, EmployeeEditViewModel ViewModel)
+        {
+            using(SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using(SqlCommand cmd = conn.CreateCommand())
+                {
+                    if (ViewModel.NowAttendingTP !=null)
+                    {
+                        foreach (var item in ViewModel.NowAttendingTP)
+                        {
+                            int RemoveEmployee = id;
+                            int RemoveTP = int.Parse(item);
+
+                            cmd.CommandText = $@"DELETE FROM EmployeeTraining
+                                                 WHERE TrainingProgramId = {RemoveTP}
+                                                 AND EmployeeId = {RemoveEmployee}";
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    if (ViewModel.NowNotAttendingTP != null) {
+                        foreach (var item in ViewModel.NowNotAttendingTP)
+                        {
+                            int AddEmployee = id;
+                            int AddTP = int.Parse(item);
+
+                            cmd.CommandText = $@"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
+                                                OUTPUT INSERTED.Id
+                                                VALUES ({AddEmployee}, {AddTP});
+                                                SELECT MAX(Id)
+                                                FROM EmployeeTraining;";
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+        }
+
+        private List<TrainingProgram> GetAttendingTP (int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"SELECT tp.Id AS TPId, 
+                                                tp.Name AS TPName
+                                         FROM EmployeeTraining et
+                                         LEFT JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
+                                         WHERE et.EmployeeId = @id AND StartDate >= GETDATE()";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<TrainingProgram> TrainingPrograms = new List<TrainingProgram>();
+
+                    while (reader.Read())
+                    {
+                        TrainingPrograms.Add(new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("TPId")),
+                            Name = reader.GetString(reader.GetOrdinal("TPName"))
+                        });
+                    }
+                    reader.Close();
+                    return TrainingPrograms;
+                }
+            }
+        } 
+
+        private List<TrainingProgram> GetNotAttendingTP (int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = $@"SELECT tp.Id AS TPId, tp.Name AS TPName
+                                            FROM TrainingProgram tp
+                                            LEFT JOIN EmployeeTraining et ON tp.Id = et.TrainingProgramId
+                                            WHERE tp.Name NOT IN (SELECT tp.Name 
+                                            FROM EmployeeTraining et
+                                            LEFT JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
+                                            WHERE et.EmployeeId = @id
+                                            AND StartDate >= GETDATE())";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    List<TrainingProgram> TrainingPrograms = new List<TrainingProgram>();
+
+                    while (reader.Read())
+                    {
+                        TrainingPrograms.Add(new TrainingProgram
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("TPId")),
+                            Name = reader.GetString(reader.GetOrdinal("TPName"))
+                        });
+                    }
+                        reader.Close();
+                        return TrainingPrograms;
+                }
+            }
+        }
         
 
         private void UpdateEmployeeComputer(int EmployeeId, int NewComputerId, int OldCompId)
@@ -349,8 +458,7 @@ namespace BangazonWorkForceManagement.Controllers
                                 Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
                             };
 
-                            }
-                      
+                            }                 
                         }
                         reader.Close();
                         return employee;
@@ -442,25 +550,18 @@ namespace BangazonWorkForceManagement.Controllers
                         UnAssignedComputers.Add(new Computer
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Make = make,
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))                         
                         });
                     }
                     reader.Close();
                     cmd.CommandText = @"SELECT com.Id, com.Make, com.Manufacturer
-
                                           FROM Computer com
-
-                                     LEFT JOIN (SELECT c.id, count(*) AS CountNulls
-
+                                    LEFT JOIN (SELECT c.id, count(*) AS CountNulls
 			                                      FROM Computer c
-
 		                                     LEFT JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
-
 			                                     WHERE UnassignDate IS NULL
-
 		                                      GROUP BY c.Id) cc ON com.Id = cc.Id
-
                                          WHERE cc.CountNulls IS NULL;";
                     SqlDataReader reader2 = cmd.ExecuteReader();
 
@@ -483,40 +584,10 @@ namespace BangazonWorkForceManagement.Controllers
                     }
 
                     reader2.Close();
-
-
                     return UnAssignedComputers;
                 }
             }
         }
-
-        private void EditComputer(EmployeeEditViewModel ViewModel)
-        {
-            try
-            {
-                using (SqlConnection conn = Connection)
-                {
-                    conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
-                    {
-                        cmd.CommandText = @"UPDATE ComputerEmployee
-                                            SET EmployeeId = @EmployeeId,
-                                            ComputerId = @ComputerId";
-                        cmd.Parameters.Add(new SqlParameter("@EmployeeId", ViewModel.Employee.Id));
-                        cmd.Parameters.Add(new SqlParameter("@ComputerId", ViewModel.Employee.Computer.Id));
-                        cmd.ExecuteNonQuery();
-
-                    
-                    }
-                }
-            }
-            catch
-            {
-             
-            }
-        }
-
-
     }
 }
 

@@ -34,6 +34,6 @@ namespace BangazonAPI.Models
         
         public Department Department { get; set; }
         public Computer Computer { get; set; }
-        public List<TrainingProgram> TrainingPrograms { get; set; }
+        public List<TrainingProgram> TrainingPrograms { get; set; } = new List<TrainingProgram>();
     }
 }

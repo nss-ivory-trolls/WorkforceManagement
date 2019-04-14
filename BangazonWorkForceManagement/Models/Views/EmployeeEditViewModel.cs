@@ -50,5 +50,36 @@ namespace BangazonWorkForceManagement.Models.Views
                 }).ToList();
             }
         }
+
+        public List<TrainingProgram> AttendingTP { get; set; } = new List<TrainingProgram>();
+        public List<TrainingProgram> NotAttendingTP { get; set; } = new List<TrainingProgram>();
+        public List<string> NowAttendingTP { get; set; } = new List<string>();
+        public List<string> NowNotAttendingTP { get; set; } = new List<string>();
+
+        public List<SelectListItem> AttendingTPOptions
+        {
+            get
+            {
+                return AttendingTP.Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name
+                }).ToList();
+            }
+        }
+
+        public List<SelectListItem> NotAttendingTPOptions
+        {
+            get
+            {
+                return NotAttendingTP.Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name
+                }).ToList();
+            }
+        }
     }
 }
+    
+

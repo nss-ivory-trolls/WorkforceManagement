@@ -240,11 +240,38 @@ namespace BangazonWorkForceManagement.Controllers
             using (SqlConnection conn = Connection)
             {
                     conn.Open();
-                    using (SqlCommand cmd = conn.CreateCommand())
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    if (Employee.Computer == null)
                     {
-                  
-                    int NewComputerId = int.Parse(ViewModel.NewComputerId);
-                    int OldCompId = Employee.Computer.Id;
+                        cmd.CommandText = @"UPDATE Employee
+                                           SET LastName = @lastName,
+                                               FirstName = @firstname,
+                                               DepartmentId = @DepartmentId
+                                            WHERE id = @id;
+
+                                           INSERT INTO ComputerEmployee(EmployeeId, ComputerId, AssignDate)
+                                           OUTPUT Inserted.Id
+                                           VALUES(@EmployeeId, @ComputerId, GETDATE());
+                                           SELECT MAX(Id)
+                                           FROM ComputerEmployee;";
+                        cmd.Parameters.Add(new SqlParameter("@EmployeeId", Employee.Id));
+                        cmd.Parameters.Add(new SqlParameter("@ComputerId", int.Parse(ViewModel.NewComputerId)));
+                        cmd.Parameters.Add(new SqlParameter("@LastName", ViewModel.Employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@FirstName", ViewModel.Employee.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@DepartmentId", ViewModel.Employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+
+                        UpdateEmployeeTrainingPrograms(id, ViewModel);
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+
+                        int NewComputerId = int.Parse(ViewModel.NewComputerId);
+                        int OldCompId = Employee.Computer.Id;
 
                         cmd.CommandText = @"UPDATE Employee
                                            SET LastName = @lastName,
@@ -255,22 +282,18 @@ namespace BangazonWorkForceManagement.Controllers
                         cmd.Parameters.Add(new SqlParameter("@FirstName", ViewModel.Employee.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@DepartmentId", ViewModel.Employee.DepartmentId));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
-                 
+
                         cmd.ExecuteNonQuery();
-                    
-                        if (Employee.Computer == null)
-                    {
-                        AddEmployeeComputer(Employee.Id, NewComputerId);
-                    }
 
                         if (NewComputerId != 0 && NewComputerId != OldCompId)
                         {
                             UpdateEmployeeComputer(id, NewComputerId, OldCompId);
                         }
 
-                    UpdateEmployeeTrainingPrograms(id, ViewModel);
-                    return RedirectToAction(nameof(Index));
+                        UpdateEmployeeTrainingPrograms(id, ViewModel);
+                        return RedirectToAction(nameof(Index));
                     }
+                }
             }
         }
           

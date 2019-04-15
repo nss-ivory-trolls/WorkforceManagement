@@ -142,8 +142,7 @@ namespace BangazonWorkForceManagement.Controllers
                         };
                             if (!reader.IsDBNull(reader.GetOrdinal("TrainingProgramId")))
                             {
-                             
-                              
+
                                 if (!employee.TrainingProgramList.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("TrainingProgramId"))))
                                 {
                                     employee.TrainingProgramList.Add(
@@ -190,16 +189,15 @@ namespace BangazonWorkForceManagement.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"insert into Employee(FirstName, LastName, DepartmentId, IsSuperVisor)
-                                             VALUES (@firstname, @lastname, @departmentid, @issupervisor)";
+                        cmd.CommandText = @"INSERT INTO Employee(FirstName, LastName, DepartmentId, IsSuperVisor)
+                                             VALUES (@FirstName, @LastName, @DepartmentId, @IsSupervisor)";
 
-                        cmd.Parameters.Add(new SqlParameter("@firstname", viewModel.Employee.FirstName));
-                        cmd.Parameters.Add(new SqlParameter("@lastname", viewModel.Employee.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@departmentid", viewModel.Employee.DepartmentId));
-                        cmd.Parameters.Add(new SqlParameter("@issupervisor", viewModel.Employee.IsSuperVisor));
+                        cmd.Parameters.Add(new SqlParameter("@FirstName", viewModel.Employee.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@LastName", viewModel.Employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@DepartmentId", viewModel.Employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@IsSupervisor", viewModel.Employee.IsSuperVisor));
 
                         cmd.ExecuteNonQuery();
-
                         return RedirectToAction(nameof(Index));
                     }
                 }
@@ -213,11 +211,11 @@ namespace BangazonWorkForceManagement.Controllers
         // GET: Employees/Edit/5
         public ActionResult Edit(int id)
         {
-            //Employee employee = GetEmployeeById(id);
-            //if (employee == null)
-            //{
-            //    return NotFound();
-            //}
+            Employee employee = GetEmployeeById(id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
 
             EmployeeEditViewModel viewModel = new EmployeeEditViewModel
             {             
@@ -244,20 +242,26 @@ namespace BangazonWorkForceManagement.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        int NewComputerId = int.Parse(ViewModel.NewComputerId);
-                        int OldCompId = Employee.Computer.Id;
+                  
+                    int NewComputerId = int.Parse(ViewModel.NewComputerId);
+                    int OldCompId = Employee.Computer.Id;
 
                         cmd.CommandText = @"UPDATE Employee
-                                           SET lastname = @lastName,
-                                               firstname = @firstname,
+                                           SET LastName = @lastName,
+                                               FirstName = @firstname,
                                                DepartmentId = @DepartmentId
                                             WHERE id = @id;";
-                        cmd.Parameters.Add(new SqlParameter("@lastname", ViewModel.Employee.LastName));
-                        cmd.Parameters.Add(new SqlParameter("@firstname", ViewModel.Employee.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@LastName", ViewModel.Employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@FirstName", ViewModel.Employee.FirstName));
                         cmd.Parameters.Add(new SqlParameter("@DepartmentId", ViewModel.Employee.DepartmentId));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
                  
                         cmd.ExecuteNonQuery();
+                    
+                        if (Employee.Computer == null)
+                    {
+                        AddEmployeeComputer(Employee.Id, NewComputerId);
+                    }
 
                         if (NewComputerId != 0 && NewComputerId != OldCompId)
                         {
@@ -280,28 +284,26 @@ namespace BangazonWorkForceManagement.Controllers
                     if (ViewModel.NowAttendingTP !=null)
                     {
                         foreach (var item in ViewModel.NowAttendingTP)
-                        {
-                            int RemoveEmployee = id;
-                            int RemoveTP = int.Parse(item);
-
+                        {                         
                             cmd.CommandText = $@"DELETE FROM EmployeeTraining
-                                                 WHERE TrainingProgramId = {RemoveTP}
-                                                 AND EmployeeId = {RemoveEmployee}";
+                                                 WHERE TrainingProgramId = @id
+                                                 AND EmployeeId = @item";
+                            cmd.Parameters.Add(new SqlParameter("@id", id));
+                            cmd.Parameters.Add(new SqlParameter("@item", int.Parse(item)));
                             cmd.ExecuteNonQuery();
                         }
                     }
 
                     if (ViewModel.NowNotAttendingTP != null) {
                         foreach (var item in ViewModel.NowNotAttendingTP)
-                        {
-                            int AddEmployee = id;
-                            int AddTP = int.Parse(item);
-
+                        {                           
                             cmd.CommandText = $@"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
                                                 OUTPUT INSERTED.Id
-                                                VALUES ({AddEmployee}, {AddTP});
+                                                VALUES (@id2, @item2);
                                                 SELECT MAX(Id)
                                                 FROM EmployeeTraining;";
+                            cmd.Parameters.Add(new SqlParameter("@id2", id));
+                            cmd.Parameters.Add(new SqlParameter("@item2", int.Parse(item)));
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -374,6 +376,28 @@ namespace BangazonWorkForceManagement.Controllers
                 }
             }
         }
+
+        private int AddEmployeeComputer (int EmployeeId, int NewComputerId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    int ComputerId = 0;
+                    cmd.CommandText = @"INSERT INTO ComputerEmployee(EmployeeId, ComputerId, AssignDate)
+                                        OUTPUT Inserted.Id
+                                        VALUES (@EmployeeId, @ComputerId, GETDATE());
+                                        SELECT MAX(Id)
+                                        FROM ComputerEmployee;";
+                    cmd.Parameters.Add(new SqlParameter("@EmployeeId", EmployeeId));
+                    cmd.Parameters.Add(new SqlParameter("@ComputerId", NewComputerId));
+
+                    ComputerId = (Int32)cmd.ExecuteScalar();
+                    return ComputerId; 
+                }
+            }
+        }
         
 
         private void UpdateEmployeeComputer(int EmployeeId, int NewComputerId, int OldCompId)
@@ -402,6 +426,7 @@ namespace BangazonWorkForceManagement.Controllers
 
                     cmd.Parameters.Add(new SqlParameter("@OldCompId", OldCompId));
                     cmd.ExecuteNonQuery();
+
                 }
             }
         }
@@ -429,7 +454,7 @@ namespace BangazonWorkForceManagement.Controllers
 										LEFT JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
                                         AND ce.UnAssignDate IS NULL
 										LEFT JOIN Computer AS c on c.Id = ce.ComputerId								
-										WHERE e.Id=@id";
+										WHERE e.Id= @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -476,7 +501,9 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT id, name from Department;";
+                    cmd.CommandText = @"SELECT Id, 
+                                               Name 
+                                        FROM Department;";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<Department> departments = new List<Department>();
@@ -486,7 +513,7 @@ namespace BangazonWorkForceManagement.Controllers
                         departments.Add(new Department
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("name"))
+                            Name = reader.GetString(reader.GetOrdinal("Name"))
                         });
                     }
                     reader.Close();
@@ -503,7 +530,12 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT id, name, startdate, enddate, maxattendees from TrainingProgram;";
+                    cmd.CommandText = @"SELECT Id, 
+                                               Name, 
+                                               StartDate, 
+                                               EndDate, 
+                                               MaxAttendees 
+                                       FROM TrainingProgram;";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
@@ -513,9 +545,9 @@ namespace BangazonWorkForceManagement.Controllers
                         trainingPrograms.Add(new TrainingProgram
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Name = reader.GetString(reader.GetOrdinal("name")),
-                            StartDate = reader.GetDateTime(reader.GetOrdinal("startdate")),
-                            EndDate = reader.GetDateTime(reader.GetOrdinal("enddate"))
+                            Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndDate"))
                         });
                     }
                     reader.Close();
@@ -536,8 +568,8 @@ namespace BangazonWorkForceManagement.Controllers
                                                comp.Make AS Make, 
                                                comp.Manufacturer AS Manufacturer
                                         FROM Computer comp
-                                        LEFT JOIN ComputerEmployee ce ON ce.id =                           ce.ComputerId
-                                        WHERE ce.EmployeeID = @id AND ce.UnAssignDate IS                   NULL";
+                                        LEFT JOIN ComputerEmployee ce ON ce.id = ce.ComputerId
+                                        WHERE ce.EmployeeID = @id AND ce.UnAssignDate IS NULL";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -556,31 +588,25 @@ namespace BangazonWorkForceManagement.Controllers
                     }
                     reader.Close();
                     cmd.CommandText = @"SELECT com.Id, com.Make, com.Manufacturer
-                                          FROM Computer com
-                                    LEFT JOIN (SELECT c.id, count(*) AS CountNulls
-			                                      FROM Computer c
-		                                     LEFT JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
-			                                     WHERE UnassignDate IS NULL
-		                                      GROUP BY c.Id) cc ON com.Id = cc.Id
-                                         WHERE cc.CountNulls IS NULL;";
+                                        FROM Computer com
+                                        LEFT JOIN (SELECT c.id, count(*) AS CountNulls
+			                            FROM Computer c
+		                                LEFT JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
+			                            WHERE UnassignDate IS NULL
+		                                GROUP BY c.Id) cc ON com.Id = cc.Id
+                                        WHERE cc.CountNulls IS NULL;";
                     SqlDataReader reader2 = cmd.ExecuteReader();
 
 
 
                     while (reader2.Read())
                     {
-
                         UnAssignedComputers.Add(new Computer
                         {
-
                             Id = reader2.GetInt32(reader2.GetOrdinal("id")),
-
                             Make = reader2.GetString(reader2.GetOrdinal("Make")),
-
                             Manufacturer = reader2.GetString(reader2.GetOrdinal("Manufacturer"))
-
                         });
-
                     }
 
                     reader2.Close();

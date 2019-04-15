@@ -22,6 +22,6 @@ namespace BangazonAPI.Models
         [Required]
         public int MaxAttendees { get; set; }
 
-        public List<Employee> Attendees { get; set; }
+        public List<Employee> Attendees { get; set; } = new List<Employee>();
     }
 }

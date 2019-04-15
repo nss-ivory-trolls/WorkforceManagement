@@ -28,9 +28,9 @@
                 <span asp-validation-for="Computer.PurchaseDate" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Computer.Employee" class="control-label"></label>
-                <select asp-for="Computer.Employee.Id" asp-items="@Model.EmployeesOptions"></select>
-                <span asp-validation-for="Computer.Employee.Id" class="text-danger"></span>
+            <label asp-for="Computer.Employee" class="control-label"></label>
+            <select asp-for="Computer.Employee.Id" asp-items="@Model.EmployeesOptions"></select>
+            <span asp-validation-for="Computer.Employee.Id" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

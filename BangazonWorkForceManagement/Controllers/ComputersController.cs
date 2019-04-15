@@ -47,20 +47,36 @@ namespace BangazonWorkForceManagement.Controllers
 
                     while (reader.Read())
                     {
-                        Computer computer = new Computer
+                        if (reader.IsDBNull(reader.GetOrdinal("FirstName")))
+                        { 
+                            Computer computer = new Computer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                                Make = reader.GetString(reader.GetOrdinal("Make")),
+                                Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
+                                PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                                DecomissionDate = reader.IsDBNull(reader.GetOrdinal("DecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("DecomissionDate"))
+                                
+                            };
+                            computers.Add(computer);
+                        }
+                        else
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                            Make = reader.GetString(reader.GetOrdinal("Make")),
-                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
-                            PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                            DecomissionDate = reader.IsDBNull(reader.GetOrdinal("DecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
-                            Employee = new Employee() {
-                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("LastName"))
-                            }
-                        };
-
-                        computers.Add(computer);
+                            Computer computer = new Computer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                                Make = reader.GetString(reader.GetOrdinal("Make")),
+                                Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
+                                PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                                DecomissionDate = reader.IsDBNull(reader.GetOrdinal("DecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
+                                Employee = new Employee()
+                                {
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName"))
+                                }
+                            };
+                            computers.Add(computer);
+                        }
                     }
 
                     reader.Close();
@@ -110,7 +126,7 @@ namespace BangazonWorkForceManagement.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        try
+                        if(viewModel.Computer.Employee.FirstName != null)
                         {
                             cmd.CommandText = @"insert into Computer (PurchaseDate, DecomissionDate, Make, Manufacturer) OUTPUT Inserted.Id values (@PurchaseDate, @DecomissionDate, @Make, @Manufacturer);";
                             cmd.Parameters.Add(new SqlParameter("@PurchaseDate", viewModel.Computer.PurchaseDate));
@@ -125,15 +141,16 @@ namespace BangazonWorkForceManagement.Controllers
                             cmd.Parameters.Add(new SqlParameter("@AssignDate", DateTime.Now));
                             cmd.ExecuteNonQuery();
                             return RedirectToAction(nameof(Index));
-                        } catch
+                        } else
                         {
-                            //cmd.CommandText = @"insert into Computer (PurchaseDate, DecomissionDate, Make, Manufacturer) OUTPUT Inserted.Id values (@PurchaseDate, @DecomissionDate, @Make, @Manufacturer);";
-                            //cmd.Parameters.Add(new SqlParameter("@PurchaseDate", viewModel.Computer.PurchaseDate));
-                            //cmd.Parameters.Add(new SqlParameter("@DecomissionDate", SqlDateTime.Null));
-                            //cmd.Parameters.Add(new SqlParameter("@Make", viewModel.Computer.Make));
-                            //cmd.Parameters.Add(new SqlParameter("@Manufacturer", viewModel.Computer.Manufacturer));
-                            //int insertedID = Convert.ToInt32(cmd.ExecuteScalar());
-                            //cmd.ExecuteNonQuery();
+                            cmd.Parameters.Clear();
+                            cmd.CommandText = @"insert into Computer (PurchaseDate, DecomissionDate, Make, Manufacturer) OUTPUT Inserted.Id values (@PurchaseDate, @DecomissionDate, @Make, @Manufacturer);";
+                            cmd.Parameters.Add(new SqlParameter("@PurchaseDate", viewModel.Computer.PurchaseDate));
+                            cmd.Parameters.Add(new SqlParameter("@DecomissionDate", SqlDateTime.Null));
+                            cmd.Parameters.Add(new SqlParameter("@Make", viewModel.Computer.Make));
+                            cmd.Parameters.Add(new SqlParameter("@Manufacturer", viewModel.Computer.Manufacturer));
+                            
+                            cmd.ExecuteNonQuery();
                             return RedirectToAction(nameof(Index));
                         }
                     }

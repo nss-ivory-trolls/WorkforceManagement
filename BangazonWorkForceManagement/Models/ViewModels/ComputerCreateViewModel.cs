@@ -52,22 +52,29 @@ namespace BangazonWorkForceManagement.Models.ViewModels
         public Computer Computer { get; set; }
         public List<Employee> Employees { get; set; }
 
-       
-        public List<SelectListItem> EmployeesOptions 
+        public List<SelectListItem> EmployeesOptions
         {
-        get
+            get
             {
-
-                return Employees.Select(e => new SelectListItem
+                List<SelectListItem> EmployeesIds = Employees.Select(e => new SelectListItem
                 {
                     Value = e.Id.ToString(),
                     Text = e.FullName
                 }).ToList();
-                
 
+                SelectListItem NoEmployee = new SelectListItem
+                {
+                    Value = null,
+                    Text = "No Employee"
+                };
+
+                EmployeesIds.Insert(0, NoEmployee);
+
+                return EmployeesIds;
             }
+
         }
         
-        
+
     }
 }

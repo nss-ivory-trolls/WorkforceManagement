@@ -5,7 +5,16 @@
 }
 
 <h1>Index</h1>
-
+<p>Search for a specific make or model.</p>
+<div class="navbar-left" style="margin-top:8px;">
+    @using (Html.BeginForm("Index", "Search", FormMethod.Get))
+    {
+        <ul class="nav navbar-nav">
+            <li>@Html.TextBox("q", ViewBag.CurrentFilter as string)</li>
+            <li><input type="submit" value="Search" /></li>
+        </ul>
+    }
+</div>
 <p>
     <a asp-action="Create">Create New</a>
 </p>

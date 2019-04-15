@@ -30,17 +30,27 @@ namespace BangazonWorkForceManagement.Controllers
         }
 
         // GET: Computers
-        public ActionResult Index()
+        public ActionResult Index(string q)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    if(!string.IsNullOrWhiteSpace(q)) { 
                     cmd.CommandText = @"SELECT c.Id as ComputerId,
                                                c.PurchaseDate, c.DecomissionDate, 
                                                c.Make, c.Manufacturer, e.FirstName, e.LastName
+                                          FROM Computer c LEFT JOIN ComputerEmployee ce on ce.ComputerId = c.Id LEFT JOIN Employee e on e.id = ce.EmployeeId
+                                            WHERE c.Make LIKE @q OR c.Manufacturer LIKE @q";
+                    } else
+                    {
+                        cmd.CommandText = @"SELECT c.Id as ComputerId,
+                                               c.PurchaseDate, c.DecomissionDate, 
+                                               c.Make, c.Manufacturer, e.FirstName, e.LastName
                                           FROM Computer c LEFT JOIN ComputerEmployee ce on ce.ComputerId = c.Id LEFT JOIN Employee e on e.id = ce.EmployeeId ";
+                    }
+                    cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     List<Computer> computers = new List<Computer>();

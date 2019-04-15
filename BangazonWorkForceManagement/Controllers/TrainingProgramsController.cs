@@ -71,8 +71,8 @@ namespace BangazonWorkForceManagement.Controllers
                 {
                     cmd.CommandText = $@"SELECT t.id AS TrainingProgramId, t.name AS ProgramName, t.startDate, t.endDate, t.maxattendees, e.id AS employeeId, e.firstName, e.lastName, e.departmentId, e.issupervisor
                                         FROM TrainingProgram t
-                                        INNER JOIN EmployeeTraining et ON et.TrainingProgramId = t.Id 
-                                        INNER JOIN Employee e ON e.Id = et.EmployeeId
+                                        LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = t.Id 
+                                        LEFT JOIN Employee e ON e.Id = et.EmployeeId
                                         WHERE t.id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -89,8 +89,7 @@ namespace BangazonWorkForceManagement.Controllers
                                 Name = reader.GetString(reader.GetOrdinal("ProgramName")),
                                 StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
                                 EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
-                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxattendees")),
-                                Attendees = new List<Employee>()
+                                MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxattendees"))
                             };
                         }
 
@@ -210,17 +209,38 @@ namespace BangazonWorkForceManagement.Controllers
         // GET: TrainingPrograms/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            TrainingProgram trainingProgram = GetTrainingProgramById(id);
+            if (trainingProgram == null)
+            {
+                return NotFound();
+            }
+
+            TrainingProgramDeleteViewModel viewModel = new TrainingProgramDeleteViewModel
+            {
+                TrainingProgram = trainingProgram
+            };
+
+            return View(viewModel);
         }
 
         // POST: TrainingPrograms/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, TrainingProgramDeleteViewModel viewModel)
         {
             try
             {
-                // TODO: Add delete logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM TrainingProgram WHERE id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
 
                 return RedirectToAction(nameof(Index));
             }
@@ -239,8 +259,8 @@ namespace BangazonWorkForceManagement.Controllers
                 {
                     cmd.CommandText = $@"SELECT t.id AS TrainingProgramId, t.name AS ProgramName, t.startDate, t.endDate, t.maxattendees, e.id AS employeeId, e.firstName, e.lastName, e.departmentId, e.issupervisor
                                         FROM TrainingProgram t
-                                        INNER JOIN EmployeeTraining et ON et.TrainingProgramId = t.Id 
-                                        INNER JOIN Employee e ON e.Id = et.EmployeeId
+                                        LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = t.Id 
+                                        LEFT JOIN Employee e ON e.Id = et.EmployeeId
                                         WHERE t.id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -258,7 +278,6 @@ namespace BangazonWorkForceManagement.Controllers
                                 StartDate = reader.GetDateTime(reader.GetOrdinal("startDate")),
                                 EndDate = reader.GetDateTime(reader.GetOrdinal("endDate")),
                                 MaxAttendees = reader.GetInt32(reader.GetOrdinal("maxattendees")),
-                                Attendees = new List<Employee>()
                             };
                         }
 

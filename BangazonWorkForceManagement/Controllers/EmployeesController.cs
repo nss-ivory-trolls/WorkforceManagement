@@ -76,36 +76,39 @@ namespace BangazonWorkForceManagement.Controllers
         // GET: Employees/Details/5
         public ActionResult Details(int id)
         {
+
+            Employee employee2 = GetEmployeeById(id);
             using (SqlConnection conn = Connection)
 
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT e.FirstName AS EmployeeFirstName,
-                                               e.Id AS EmployeeId,
-                                               e.IsSupervisor AS IsSupervisor,
-	                                           e.LastName AS EmployeeLastName,
-                                               d.Budget AS DepartmentBudget,
-	                                           d.Name AS DepartmentName,
-                                               d.Id as DepartmentId,
-											   c.Make as ComputerMake,
-                                               c.Id as ComputerId,
-											   c.PurchaseDate as ComputerPurchaseDate,
-											   c.DecomissionDate as ComputerDecomissionDate,
-											   c.Manufacturer as ComputerManufacturer,
-                                               tp.Id as TrainingProgramId,
-											   tp.Name as TrainingProgramName,
-											   tp.StartDate as TrainingProgramStartDate,
-											   tp.EndDate as TrainingProgramEndDate,
-											   tp.MaxAttendees as TrainingProgramMaxAtendees
+                    cmd.CommandText = @"SELECT 
+                                        e.FirstName AS EmployeeFirstName,
+                                        e.Id AS EmployeeId,
+                                        e.IsSupervisor AS IsSupervisor,
+                                        e.LastName AS EmployeeLastName,
+                                        d.Budget AS DepartmentBudget,
+                                        d.Name AS DepartmentName,
+                                        d.Id as DepartmentId,
+                                        c.Make as ComputerMake,
+                                        c.Id as ComputerId,
+                                        c.PurchaseDate as ComputerPurchaseDate,
+                                        c.DecomissionDate as ComputerDecomissionDate,
+                                        c.Manufacturer as ComputerManufacturer,
+                                        tp.Id as TrainingProgramId,
+                                        tp.Name as TrainingProgramName,
+                                        tp.StartDate as TrainingProgramStartDate,
+                                        tp.EndDate as TrainingProgramEndDate,
+                                        tp.MaxAttendees as TrainingProgramMaxAtendees
                                         FROM Employee e
                                         JOIN Department AS d on d.Id = e.DepartmentId
-										LEFT JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
-										LEFT JOIN Computer AS c on c.Id = ce.ComputerId
-										LEFT JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
-										LEFT JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
-										WHERE e.Id = @id AND ce.UnAssignDate IS NULL";
+                                        LEFT JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
+                                        LEFT JOIN Computer AS c on c.Id = ce.ComputerId AND ce.UnAssignDate IS NULL 
+                                        LEFT JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
+                                        LEFT JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
+                                        WHERE e.Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@Id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
                     EmployeeDetailViewModel employee = null;
@@ -129,7 +132,7 @@ namespace BangazonWorkForceManagement.Controllers
                                 Computer = new Computer()
                             };
                         }
-                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")) && !reader.IsDBNull(reader.GetOrdinal("ComputerMake")) && !reader.IsDBNull(reader.GetOrdinal("ComputerPurchaseDate")) && !reader.IsDBNull(reader.GetOrdinal("ComputerManufacturer")) && !reader.IsDBNull(reader.GetOrdinal("ComputerDecomissionDate")))
                         {
                             employee.Computer = new Computer
                             {
@@ -155,10 +158,7 @@ namespace BangazonWorkForceManagement.Controllers
                                     MaxAttendees = reader.GetInt32(reader.GetOrdinal("TrainingProgramMaxAtendees"))
                                 });
                                 }
-                            } else
-                        {
-                            Console.WriteLine("WRONG");
-                        }
+                            } 
                         }                    
                     reader.Close();
                     return View(employee);
@@ -373,14 +373,23 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = $@"SELECT tp.Id AS TPId, tp.Name AS TPName
-                                            FROM TrainingProgram tp
-                                            LEFT JOIN EmployeeTraining et ON tp.Id = et.TrainingProgramId
-                                            WHERE tp.Name NOT IN (SELECT tp.Name 
-                                            FROM EmployeeTraining et
-                                            LEFT JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
-                                            WHERE et.EmployeeId = @id
-                                            AND StartDate >= GETDATE())";
+                    cmd.CommandText = $@"SELECT AttendeeCount, 
+                                        TrainingProgramId AS TPId, 
+                                        tp.Name AS TPName,
+                                        tp.MaxAttendees
+                                        FROM(
+                                        SELECT Count(EmployeeId) AS AttendeeCount, TrainingProgramId
+                                        FROM EmployeeTraining
+                                        GROUP BY TrainingProgramId
+                                        ) AS Counts
+                                        LEFT JOIN TrainingProgram tp on tp.Id= Counts.TrainingProgramId
+                                        WHERE Counts.AttendeeCount < tp.MaxAttendees 
+                                        AND tp.Name NOT IN (
+                                        SELECT tp.Name 
+                                        FROM EmployeeTraining et
+                                        LEFT JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
+                                        WHERE et.EmployeeId = @id
+                                        AND StartDate >= GETDATE())";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
 
@@ -494,7 +503,7 @@ namespace BangazonWorkForceManagement.Controllers
                             IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSupervisor")),
                             DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId"))
                         };
-                    if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                    if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")) && !reader.IsDBNull(reader.GetOrdinal("ComputerMake")) && !reader.IsDBNull(reader.GetOrdinal("PurchaseDate")) && !reader.IsDBNull(reader.GetOrdinal("Manufacturer")) && !reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
                         {
 
                             employee.Computer = new Computer
@@ -587,29 +596,8 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT comp.Id AS ComputerId, 
-                                               comp.Make AS Make, 
-                                               comp.Manufacturer AS Manufacturer
-                                        FROM Computer comp
-                                        LEFT JOIN ComputerEmployee ce ON ce.id = ce.ComputerId
-                                        WHERE ce.EmployeeID = @id AND ce.UnAssignDate IS NULL";
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-                    SqlDataReader reader = cmd.ExecuteReader();
-
                     List<Computer> UnAssignedComputers = new List<Computer>();
 
-                    if (reader.Read())
-                    {
-                        string make = $"{reader.GetString(reader.GetOrdinal("Make"))}: Current Computer";
-
-                        UnAssignedComputers.Add(new Computer
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
-                            Make = make,
-                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))                         
-                        });
-                    }
-                    reader.Close();
                     cmd.CommandText = @"SELECT com.Id, com.Make, com.Manufacturer
                                         FROM Computer com
                                         LEFT JOIN (SELECT c.id, count(*) AS CountNulls
@@ -618,21 +606,19 @@ namespace BangazonWorkForceManagement.Controllers
 			                            WHERE UnassignDate IS NULL
 		                                GROUP BY c.Id) cc ON com.Id = cc.Id
                                         WHERE cc.CountNulls IS NULL;";
-                    SqlDataReader reader2 = cmd.ExecuteReader();
+                    SqlDataReader reader = cmd.ExecuteReader();
 
-
-
-                    while (reader2.Read())
+                    while (reader.Read())
                     {
                         UnAssignedComputers.Add(new Computer
                         {
-                            Id = reader2.GetInt32(reader2.GetOrdinal("id")),
-                            Make = reader2.GetString(reader2.GetOrdinal("Make")),
-                            Manufacturer = reader2.GetString(reader2.GetOrdinal("Manufacturer"))
+                            Id = reader.GetInt32(reader.GetOrdinal("id")),
+                            Make = reader.GetString(reader.GetOrdinal("Make")),
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
                         });
                     }
 
-                    reader2.Close();
+                    reader.Close();
                     return UnAssignedComputers;
                 }
             }

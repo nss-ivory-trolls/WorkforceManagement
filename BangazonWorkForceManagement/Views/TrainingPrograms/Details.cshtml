@@ -58,7 +58,7 @@
 @if (Model.StartDate < DateTime.Today)
 {
     <div>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+    
 @Html.ActionLink("Back to Past Program List", "Index", new { _pastprograms = "true" })
 
     </div>

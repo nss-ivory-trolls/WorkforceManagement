@@ -8,22 +8,9 @@ namespace BangazonWorkForceManagement.Models.ViewModels
 {
     public class TrainingProgramIndexViewModel
     {
-        public TrainingProgram TrainingProgram { get; set; }
+        public List<TrainingProgram> TrainingPrograms { get; set; } = new List<TrainingProgram>();
 
-        public Boolean UpcomingEvents
-        {
-            get {
-                if (TrainingProgram.StartDate < DateTime.Today)
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
+        public bool PastProgram { get; set; } = false;
 
-            }
-
-        }
     }
 }

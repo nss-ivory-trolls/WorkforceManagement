@@ -52,6 +52,7 @@ namespace BangazonWorkForceManagement.Controllers
                     }
                     SqlDataReader reader = cmd.ExecuteReader();
 
+                    TrainingProgramIndexViewModel toTheModel = new TrainingProgramIndexViewModel();
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
 
                     while (reader.Read())
@@ -66,8 +67,18 @@ namespace BangazonWorkForceManagement.Controllers
                         };
                         trainingPrograms.Add(trainingProgram);
                     }
+                    toTheModel.TrainingPrograms = trainingPrograms;
+                    if (_pastprograms == "true")
+                    {
+                        toTheModel.PastProgram = true;
+
+                    } else if (_pastprograms == "false")
+                    {
+                        toTheModel.PastProgram = false;
+                    }
                     reader.Close();
-                    return View(trainingPrograms);
+
+                    return View(toTheModel);
                 }
             }
         }

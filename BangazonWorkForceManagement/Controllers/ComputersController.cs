@@ -126,7 +126,7 @@ namespace BangazonWorkForceManagement.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        if(viewModel.Computer.Employee.FirstName != null)
+                        if(viewModel.Computer.Employee.Id != 0)
                         {
                             cmd.CommandText = @"insert into Computer (PurchaseDate, DecomissionDate, Make, Manufacturer) OUTPUT Inserted.Id values (@PurchaseDate, @DecomissionDate, @Make, @Manufacturer);";
                             cmd.Parameters.Add(new SqlParameter("@PurchaseDate", viewModel.Computer.PurchaseDate));
@@ -190,8 +190,6 @@ namespace BangazonWorkForceManagement.Controllers
 
                     assignedcomputer = reader.IsDBNull(reader.GetOrdinal("ComputerEmployeeCID")) ? (int?)null : (int?)reader.GetInt32(reader.GetOrdinal("ComputerEmployeeCID"));
 
-                    
-
                             ComputerDeleteViewModel viewModel = new ComputerDeleteViewModel
                             {
                                 Id = id,
@@ -199,12 +197,10 @@ namespace BangazonWorkForceManagement.Controllers
                                 Manufacturer = computer.Manufacturer,
                                 PurchaseDate = computer.PurchaseDate,
                                 ShouldDisplayDelete = assignedcomputer == null
-                    };
+                            };
 
                         reader.Close();
                         return View(viewModel);
-
-                       
                 }
             }
         }

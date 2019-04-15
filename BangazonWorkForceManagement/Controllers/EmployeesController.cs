@@ -132,13 +132,13 @@ namespace BangazonWorkForceManagement.Controllers
                                 Computer = new Computer()
                             };
                         }
-                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")) && !reader.IsDBNull(reader.GetOrdinal("ComputerMake")) && !reader.IsDBNull(reader.GetOrdinal("ComputerPurchaseDate")) && !reader.IsDBNull(reader.GetOrdinal("ComputerManufacturer")) && !reader.IsDBNull(reader.GetOrdinal("ComputerDecomissionDate")))
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
                         {
                             employee.Computer = new Computer
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                 PurchaseDate = reader.GetDateTime(reader.GetOrdinal("ComputerPurchaseDate")),
-                                DecommissionDate = reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
+                                DecommissionDate = reader.IsDBNull(reader.GetOrdinal("ComputerDecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
                                 Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
                                 Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"))
                             };
@@ -602,10 +602,10 @@ namespace BangazonWorkForceManagement.Controllers
                                         FROM Computer com
                                         LEFT JOIN (SELECT c.id, count(*) AS CountNulls
 			                            FROM Computer c
-		                                LEFT JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
+		                                JOIN ComputerEmployee ce ON c.Id = ce.ComputerId
 			                            WHERE UnassignDate IS NULL
 		                                GROUP BY c.Id) cc ON com.Id = cc.Id
-                                        WHERE cc.CountNulls IS NULL;";
+                                        WHERE cc.CountNulls IS NULL AND DecomissionDate IS NULL;";
                     SqlDataReader reader = cmd.ExecuteReader();
 
                     while (reader.Read())

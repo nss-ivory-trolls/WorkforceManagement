@@ -35,15 +35,18 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Computer.Make)
         </dd>
-
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.TrainingProgramList)
-        </dt>
-        @foreach (var tp in Model.TrainingProgramList)
+        @if (Model.TrainingProgramList.Count > 0)
         {
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => tp.Name)
-            </dd>
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => model.TrainingProgramList)
+            </dt>
+
+            @foreach (var tp in Model.TrainingProgramList)
+            {
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => tp.Name)
+                </dd>
+            }
         }
     </dl>
 </div>

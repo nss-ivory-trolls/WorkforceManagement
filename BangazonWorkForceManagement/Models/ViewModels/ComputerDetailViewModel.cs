@@ -1,23 +1,24 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace BangazonAPI.Models
+namespace BangazonWorkForceManagement.Models.ViewModels
 {
-
-    public class Computer
+    public class ComputerDetailViewModel
     {
         public int Id { get; set; }
 
-        [Required]
+     
         public DateTime PurchaseDate { get; set; }
 
-        [Required]
+        
         public DateTime? DecomissionDate { get; set; }
 
-        [Required]
+       
         public string Make { get; set; }
 
-        [Required]
+       
         public string Manufacturer { get; set; }
     }
 }

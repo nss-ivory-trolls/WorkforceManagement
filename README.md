@@ -17,5 +17,7 @@ When a user clicks on the 'Employees' tab in the navigation bar, the user should
 #### Details
 From the list view, when a user clicks on a specific employee, the user should be redirected to the details view of that employee. The details view should include the employee's first name, last name, department, computer make and a list of past and future training programs. 
 
+#### Create Employee
+From the list view of employees, when a user clicks the "Create New" link, the user should be re-directed to a form. The user can then enter the new employee's first name, last name, whether they are a supervisor and what department they work within.
 
 

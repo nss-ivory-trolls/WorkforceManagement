@@ -102,10 +102,10 @@ namespace BangazonWorkForceManagement.Controllers
 											   tp.MaxAttendees as TrainingProgramMaxAtendees
                                         FROM Employee e
                                         JOIN Department AS d on d.Id = e.DepartmentId
-										JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
-										JOIN Computer AS c on c.Id = ce.ComputerId
-										JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
-										JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
+										LEFT JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
+										LEFT JOIN Computer AS c on c.Id = ce.ComputerId
+										LEFT JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
+										LEFT JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
 										WHERE e.Id = @id AND ce.UnAssignDate IS NULL";
                     cmd.Parameters.Add(new SqlParameter("@Id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
@@ -127,19 +127,22 @@ namespace BangazonWorkForceManagement.Controllers
                                     Name = reader.GetString(reader.GetOrdinal("DepartmentName")),
                                     Budget = reader.GetInt32(reader.GetOrdinal("DepartmentBudget"))
                                 },
-                                Computer = new Computer
+                                Computer = new Computer()
+                            };
+                        }
+                        if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+                        {                         
+                                employee.Computer = new Computer
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                     PurchaseDate = reader.GetDateTime(reader.GetOrdinal("ComputerPurchaseDate")),
                                     DecommissionDate = reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
                                     Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
                                     Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"))
-                                }
+                                };
                             };
-                        }
-                        if (!reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
-                        {
-
+                        
+                    
                             if (!reader.IsDBNull(reader.GetOrdinal("TrainingProgramId")))
                             {
                                 if (!employee.TrainingProgramList.Exists(x => x.Id == reader.GetInt32(reader.GetOrdinal("TrainingProgramId"))))
@@ -154,34 +157,50 @@ namespace BangazonWorkForceManagement.Controllers
                                     MaxAttendees = reader.GetInt32(reader.GetOrdinal("TrainingProgramMaxAtendees"))
                                 });
                                 }
-
                             }
-                        }
-                    };
+                        }                    
                     reader.Close();
                     return View(employee);
                 }
-  
-                }
             }
+        }
         
 
         // GET: Employees/Create
         public ActionResult Create()
         {
-            return View();
+            {
+                EmployeeCreateViewModel viewModel =
+                    new EmployeeCreateViewModel(_config.GetConnectionString("DefaultConnection"));
+                return View(viewModel);
+            }
         }
 
         // POST: Employees/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult Create(EmployeeCreateViewModel viewModel)
         {
             try
             {
-                // TODO: Add insert logic here
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"insert into Employee(FirstName, LastName, DepartmentId, IsSuperVisor)
+                                             VALUES (@firstname, @lastname, @departmentid, @issupervisor)";
+                        
+                        cmd.Parameters.Add(new SqlParameter("@firstname", viewModel.Employee.FirstName));
+                        cmd.Parameters.Add(new SqlParameter("@lastname", viewModel.Employee.LastName));
+                        cmd.Parameters.Add(new SqlParameter("@departmentid", viewModel.Employee.DepartmentId));
+                        cmd.Parameters.Add(new SqlParameter("@issupervisor", viewModel.Employee.IsSuperVisor));
 
-                return RedirectToAction(nameof(Index));
+                        cmd.ExecuteNonQuery();
+
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
             }
             catch
             {

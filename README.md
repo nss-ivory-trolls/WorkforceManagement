@@ -208,3 +208,13 @@ If viewing the details page of an _upcoming_ training program, you will see a "E
 ### Delete
 If viewing the details page of an _upcoming_ training program, you will see a "Delete" link. When you click "Delete," you will be asked to confirm the deletion. If you then click the "Delete" button, the program will be deleted from the system and you will be returned to the training programs list. If you are viewing a _past_ training program, you will not be able to delete that program.
 
+## Departments
+
+### Department List
+To view all Departments, click the "Departments" link in the navigation bar. The Department view shows links for "Create new Department" under the page title and "details" link to the right of each department.
+
+### Create
+You can add a new department by clicking the "Create New" link on the Departments List view. The link will show a form with an input field requesting the new department name and budget. Once submitted, you will be returned to the Department List and the new department will be displayed.
+
+### Details
+Click on the "Details" link on an individual department to see a list of that department's name in the heading, budget and employees underneath.

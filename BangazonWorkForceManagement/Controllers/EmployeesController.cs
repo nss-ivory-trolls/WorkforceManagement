@@ -141,7 +141,7 @@ namespace BangazonWorkForceManagement.Controllers
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                 PurchaseDate = reader.GetDateTime(reader.GetOrdinal("ComputerPurchaseDate")),
-                                DecommissionDate = reader.IsDBNull(reader.GetOrdinal("ComputerDecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
+                                DecomissionDate = reader.IsDBNull(reader.GetOrdinal("ComputerDecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
                                 Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
                                 Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"))
 
@@ -509,7 +509,7 @@ namespace BangazonWorkForceManagement.Controllers
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
                                 PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                                DecommissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
+                                DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
                                 Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
                                 Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
                             };

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BangazonWorkForceManagement.Controllers
+namespace BangazonWorkForceManagement.Models.Views
 {
-    public class EmployeeEditViewModel
+    public class EmployeeEditTrainingProgramViewModel
     {
     }
 }

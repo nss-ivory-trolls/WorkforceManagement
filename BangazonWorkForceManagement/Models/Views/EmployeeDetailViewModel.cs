@@ -9,6 +9,10 @@ namespace BangazonWorkForceManagement.Models.Views
 {
     public class EmployeeDetailViewModel
     {
+        public EmployeeDetailViewModel()
+        {
+            TrainingProgramList = new List<TrainingProgram>();
+         }
         public int Id { get; set; }
 
         [Required]
@@ -26,7 +30,9 @@ namespace BangazonWorkForceManagement.Models.Views
         public int DepartmentId { get; set; }
 
         public Department Department { get; set; }
+
         public Computer Computer { get; set; }
-        public List<TrainingProgram> TrainingProgramList { get; set; } = new List<TrainingProgram>();
+
+        public List<TrainingProgram> TrainingProgramList { get; set; } 
     }
 }

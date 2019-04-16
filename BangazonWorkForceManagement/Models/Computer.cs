@@ -13,7 +13,7 @@ namespace BangazonAPI.Models
 
         [Required]
 
-        public DateTime? DecommissionDate { get; set; }
+        public DateTime? DecomissionDate { get; set; }
 
 
         [Required]

@@ -189,6 +189,7 @@ namespace BangazonWorkForceManagement.Controllers
             return View();
         }
 
+
         // POST: Departments/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]

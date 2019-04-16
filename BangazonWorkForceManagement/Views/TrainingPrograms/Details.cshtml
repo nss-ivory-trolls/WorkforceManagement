@@ -11,28 +11,28 @@
     <h4>TrainingProgram</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Name)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Name)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.StartDate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.StartDate)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.EndDate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.EndDate)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.MaxAttendees)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.MaxAttendees)
         </dd>
     </dl>
@@ -55,7 +55,19 @@
         }
     </dl>
 </div>
+@if (Model.StartDate < DateTime.Today)
+{
+    <div>
+    
+@Html.ActionLink("Back to Past Program List", "Index", new { _pastprograms = "true" })
+
+    </div>
+}
+else
+{
 <div>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.Id}) |
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) | 
     <a asp-action="Index">Back to List</a>
 </div>
+
+}

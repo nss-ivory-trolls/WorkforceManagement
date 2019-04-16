@@ -307,26 +307,27 @@ namespace BangazonWorkForceManagement.Controllers
                     if (ViewModel.NowAttendingTP !=null)
                     {
                         foreach (var item in ViewModel.NowAttendingTP)
-                        {                         
+                        {
+                            int Id = id;
+                            int Item = int.Parse(item);
                             cmd.CommandText = $@"DELETE FROM EmployeeTraining
-                                                 WHERE TrainingProgramId = @id
-                                                 AND EmployeeId = @item";
-                            cmd.Parameters.Add(new SqlParameter("@id", id));
-                            cmd.Parameters.Add(new SqlParameter("@item", int.Parse(item)));
+                                                 WHERE TrainingProgramId = {Item}
+                                                 AND EmployeeId = {Id}";
+                           
                             cmd.ExecuteNonQuery();
                         }
                     }
 
                     if (ViewModel.NowNotAttendingTP != null) {
                         foreach (var item in ViewModel.NowNotAttendingTP)
-                        {                           
-                            cmd.CommandText = $@"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)
-                                                OUTPUT INSERTED.Id
-                                                VALUES (@id2, @item2);
+                        {
+                            int EmployeeId = id;
+                            int TrainingProgramId = int.Parse(item);
+
+                            cmd.CommandText = $@"INSERT INTO EmployeeTraining (EmployeeId, TrainingProgramId)                                           OUTPUT INSERTED.Id
+                                                VALUES ({EmployeeId}, {TrainingProgramId});
                                                 SELECT MAX(Id)
-                                                FROM EmployeeTraining;";
-                            cmd.Parameters.Add(new SqlParameter("@id2", id));
-                            cmd.Parameters.Add(new SqlParameter("@item2", int.Parse(item)));
+                                                FROM EmployeeTraining;";                         
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -342,7 +343,7 @@ namespace BangazonWorkForceManagement.Controllers
                 
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = $@"SELECT tp.Id AS TPId, 
+                    cmd.CommandText = $@"SELECT DISTINCT tp.Id AS TPId, 
                                                 tp.Name AS TPName
                                          FROM EmployeeTraining et
                                          LEFT JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
@@ -373,22 +374,16 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = $@"SELECT AttendeeCount, 
-                                        TrainingProgramId AS TPId, 
-                                        tp.Name AS TPName,
-                                        tp.MaxAttendees
-                                        FROM(
-                                        SELECT Count(EmployeeId) AS AttendeeCount, TrainingProgramId
-                                        FROM EmployeeTraining
-                                        GROUP BY TrainingProgramId
-                                        ) AS Counts
-                                        LEFT JOIN TrainingProgram tp on tp.Id= Counts.TrainingProgramId
-                                        WHERE Counts.AttendeeCount < tp.MaxAttendees 
+                    cmd.CommandText = $@"SELECT DISTINCT tp.Id AS TPId, 
+                                        tp.Name AS TPName
+                                        FROM TrainingProgram tp
+                                        LEFT JOIN EmployeeTraining et on et.TrainingProgramId = tp.Id
+                                        WHERE tp.StartDate >= GETDATE()  
                                         AND tp.Name NOT IN (
-                                        SELECT tp.Name 
-                                        FROM EmployeeTraining et
-                                        LEFT JOIN TrainingProgram tp ON tp.Id = et.TrainingProgramId
-                                        WHERE et.EmployeeId = @id
+                                        SELECT tp.Name
+                                        FROM TrainingProgram tp
+                                        LEFT JOIN EmployeeTraining et ON et.TrainingProgramId = tp.Id
+                                        WHERE et.EmployeeId = 1
                                         AND StartDate >= GETDATE())";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = cmd.ExecuteReader();

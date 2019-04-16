@@ -5,7 +5,7 @@ Bangazon Workforce Management is an internal application for Bangazon Corportati
 
 ## Use Intructions
 <hr>
-- Clone this repository
+- Clone this repository<br>
 - Use the command dotnet run to start the program
 
 ### Employee

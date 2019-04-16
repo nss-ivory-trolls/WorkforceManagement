@@ -10,7 +10,7 @@ Bangazon Workforce Management is an internal application for Bangazon Corportati
 
 ### Employee
 <hr>
-The Employee View of the website includes the following:
+The Employee View of the website includes the following:<br>
 #### List View
 When a user clicks on the 'Employees' tab in the navigation bar, the user should be re-directed to a list view of the first name, last name and department of the employees in Bangazon Corp.
 

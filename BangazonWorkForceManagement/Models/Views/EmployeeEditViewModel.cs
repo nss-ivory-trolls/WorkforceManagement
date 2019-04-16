@@ -32,9 +32,11 @@ namespace BangazonWorkForceManagement.Models.Views
                     Value = c.Id.ToString(),
                     Text = c.Make
                 }).ToList();
-
-                UC.Insert(0, new SelectListItem { Value = "0", Text = "Select Item", Selected = true });
-                return UC; 
+               
+                    UC.Insert(0, new SelectListItem { Value = "0", Text = "Do Not Assign Computer", Selected = true });
+                    return UC;
+                
+              
             }
         }
 

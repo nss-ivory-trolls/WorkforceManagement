@@ -15,7 +15,6 @@ namespace BangazonAPI.Models
 
         public DateTime? DecomissionDate { get; set; }
 
-
         [Required]
         public string Make { get; set; }
 

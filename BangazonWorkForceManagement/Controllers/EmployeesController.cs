@@ -595,7 +595,28 @@ namespace BangazonWorkForceManagement.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
+                    cmd.CommandText = $@"SELECT c.id AS ComputerId, c.Make, c.Manufacturer
+                                          FROM Computer c
+                                     LEFT JOIN ComputerEmployee ce ON c.id = ce.ComputerId
+                                         WHERE ce.EmployeeId = {id} AND ce.UnassignDate IS NULL";
+
+                    SqlDataReader reader = cmd.ExecuteReader();
                     List<Computer> UnAssignedComputers = new List<Computer>();
+
+                    if (reader.Read())
+                    {
+
+                        string make = $"Current Computer:{reader.GetString(reader.GetOrdinal("Make"))}";
+
+                        UnAssignedComputers.Add(new Computer
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                            Make = make,
+                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                        });
+                    }
+                    reader.Close();
+                   
 
                     cmd.CommandText = @"SELECT com.Id, com.Make, com.Manufacturer
                                         FROM Computer com
@@ -605,19 +626,19 @@ namespace BangazonWorkForceManagement.Controllers
 			                            WHERE UnassignDate IS NULL
 		                                GROUP BY c.Id) cc ON com.Id = cc.Id
                                         WHERE cc.CountNulls IS NULL AND DecomissionDate IS NULL;";
-                    SqlDataReader reader = cmd.ExecuteReader();
+                    SqlDataReader reader1 = cmd.ExecuteReader();
 
-                    while (reader.Read())
+                    while (reader1.Read())
                     {
                         UnAssignedComputers.Add(new Computer
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("id")),
-                            Make = reader.GetString(reader.GetOrdinal("Make")),
-                            Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                            Id = reader1.GetInt32(reader1.GetOrdinal("id")),
+                            Make = reader1.GetString(reader1.GetOrdinal("Make")),
+                            Manufacturer = reader1.GetString(reader1.GetOrdinal("Manufacturer"))
                         });
                     }
 
-                    reader.Close();
+                    reader1.Close();
                     return UnAssignedComputers;
                 }
             }

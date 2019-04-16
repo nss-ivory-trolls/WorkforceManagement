@@ -190,3 +190,21 @@ From the list view, when a user clicks on a specific employee, the user should b
 From the list view of employees, when a user clicks the "Create New" link, the user should be re-directed to a form. The user can then enter the new employee's first name, last name, whether they are a supervisor and what department they work within.
 
 
+
+## Training Programs
+
+### Program List
+To see a list of upcoming training programs, click on the "Training Programs" link in the navbar. You'll then see a table listing each program's Name, Start Date, End Date, and Max Attendees. To see a list of _past_ training programs, click the "View Past Programs" at the top of the list page.
+
+### Create
+To create a new training program, click the "Create New Program" link at the top of the List page. You will need to input the Name, Start Date, End Date, and Max Number of Attendees for the new program. When done, click Save and you will be returned to the Training Program list.
+
+### Details
+To see the details of a training program, click the "Detail" link on the List page. In addition to the basic program information, you will also see a list of employees who are attending or attended that program.
+
+### Edit
+If viewing the details page of an _upcoming_ training program, you will see a "Edit" link. When you click "Edit," you will be be presented with a form to update the detail of that program. After clicking "Save," you will be returned to the training programs list page. If you are viewing a _past_ training program, you will not be able to edit that program.
+
+### Delete
+If viewing the details page of an _upcoming_ training program, you will see a "Delete" link. When you click "Delete," you will be asked to confirm the deletion. If you then click the "Delete" button, the program will be deleted from the system and you will be returned to the training programs list. If you are viewing a _past_ training program, you will not be able to delete that program.
+

@@ -13,7 +13,7 @@ Welcome to **Bangazon Workforce Management,** the employee management system. Th
 - Google Chrome
 
 ## Enitity Relationship Diagram
-<img src="erd.png" width="900" />
+<img src="https://i.imgur.com/gxoBsAo.png" />
 
 ## Use Intructions
 <hr>

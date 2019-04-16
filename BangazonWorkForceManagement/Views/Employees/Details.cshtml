@@ -37,14 +37,36 @@
         </dd>
         @if (Model.TrainingProgramList.Count > 0)
         {
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.TrainingProgramList)
+            <dt class="col-sm-6">
+                @Html.DisplayName("Future Training Programs")
             </dt>
 
             @foreach (var tp in Model.TrainingProgramList)
             {
                 <dd class="col-sm-10">
-                    @Html.DisplayFor(model => tp.Name)
+                    @if (tp.StartDate >= DateTime.Today)
+                    {
+                        @Html.DisplayFor(model => tp.Name)
+                    }
+
+                </dd>
+            }
+        }
+
+        @if (Model.TrainingProgramList.Count > 0)
+        {
+            <dt class="col-sm-6">
+                @Html.DisplayName("Past Training Programs")
+            </dt>
+
+            @foreach (var tp in Model.TrainingProgramList)
+            {
+                <dd class="col-sm-10">
+                    @if (tp.StartDate < DateTime.Today)
+                    {
+                        @Html.DisplayFor(model => tp.Name)
+                    }
+
                 </dd>
             }
         }

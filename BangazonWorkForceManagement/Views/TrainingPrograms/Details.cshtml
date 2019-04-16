@@ -1,0 +1,61 @@
+﻿@using BangazonAPI.Models
+@model BangazonAPI.Models.TrainingProgram
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>TrainingProgram</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.StartDate)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.StartDate)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.EndDate)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.EndDate)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MaxAttendees)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.MaxAttendees)
+        </dd>
+    </dl>
+    <h4>@Html.DisplayNameFor(model => model.Attendees):</h4>
+    <dl class="row">
+        @if (Model.Attendees.Count > 0)
+        {
+            foreach (Employee item in Model.Attendees)
+            {
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => item.FullName)
+                </dd>
+            }
+        }
+        else
+        {
+            <dd class="col-sm-10">
+                No Employees signed up yet.
+            </dd>
+        }
+    </dl>
+</div>
+<div>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.Id}) |
+    <a asp-action="Index">Back to List</a>
+</div>

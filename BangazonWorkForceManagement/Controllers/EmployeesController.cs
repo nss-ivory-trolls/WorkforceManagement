@@ -104,11 +104,13 @@ namespace BangazonWorkForceManagement.Controllers
                                         tp.MaxAttendees as TrainingProgramMaxAtendees
                                         FROM Employee e
                                         JOIN Department AS d on d.Id = e.DepartmentId
+
                                         LEFT JOIN ComputerEmployee AS ce on ce.EmployeeId = e.Id
                                         LEFT JOIN Computer AS c on c.Id = ce.ComputerId AND ce.UnAssignDate IS NULL 
                                         LEFT JOIN EmployeeTraining AS et on et.EmployeeId = e.Id
                                         LEFT JOIN TrainingProgram AS tp on tp.Id = et.TrainingProgramId
                                         WHERE e.Id = @id";
+
                     cmd.Parameters.Add(new SqlParameter("@Id", id));
                     SqlDataReader reader = cmd.ExecuteReader();
                     EmployeeDetailViewModel employee = null;
@@ -133,6 +135,7 @@ namespace BangazonWorkForceManagement.Controllers
                             };
                         }
                         if (!reader.IsDBNull(reader.GetOrdinal("ComputerId")))
+
                         {
                             employee.Computer = new Computer
                             {
@@ -141,6 +144,7 @@ namespace BangazonWorkForceManagement.Controllers
                                 DecommissionDate = reader.IsDBNull(reader.GetOrdinal("ComputerDecomissionDate")) ? (DateTime?)null : (DateTime?)reader.GetDateTime(reader.GetOrdinal("ComputerDecomissionDate")),
                                 Make = reader.GetString(reader.GetOrdinal("ComputerMake")),
                                 Manufacturer = reader.GetString(reader.GetOrdinal("ComputerManufacturer"))
+
                             };
                         };
                             if (!reader.IsDBNull(reader.GetOrdinal("TrainingProgramId")))
